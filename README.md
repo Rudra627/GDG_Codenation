@@ -1,6 +1,6 @@
-# LeetCode Clone Platform
+# GDG Codenation Platform
 
-A full-stack LeetCode-like coding platform with user authentication, problem viewing, code execution, and an admin dashboard for managing problems and test cases.
+A full-stack coding platform with user authentication, problem viewing, code execution, and an admin dashboard for managing problems and test cases.
 
 ## Technologies Used
 - **Backend**: Node.js, Express.js, MySQL (mysql2), JWT, bcrypt, Axios (for Judge0)
@@ -66,11 +66,3 @@ JUDGE0_API_KEY=your_rapidapi_key_here
 2. Install dependencies: `npm install`
 3. Start development server: `npm run dev`
 4. Access the app on your browser typically at `http://localhost:5173`
-
-### 4. Admin Setup
-1. Go to `http://localhost:5173/register` and create an account.
-2. The default role is 'User'. To make an Admin, open your MySQL terminal and run:
-```sql
-UPDATE users SET role = 'Admin' WHERE email = 'your_email@example.com';
-```
-3. Logout and login again. You will now see the `Admin` nav link!
