@@ -14,7 +14,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Basic Route
 app.get('/', (req, res) => {
-    res.send('LeetCode Clone API is running...');
+    res.send('Backend started...');
 });
 
 // Import Routes
