@@ -177,7 +177,6 @@ const HomePage = () => {
                     </div>
                 </div>
             </section>
-
             {/* Footer Section */}
             <footer className="w-full border-t border-[#07fc03]/20 bg-[#050505] py-12 relative z-10 mt-auto">
                 <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">

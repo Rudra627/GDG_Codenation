@@ -8,8 +8,7 @@ const Loader = ({ onComplete }) => {
             setProgress((prev) => {
                 if (prev >= 100) {
                     clearInterval(interval);
-                    setTimeout(() => onComplete(), 400); // Brief pause before unmount
-                    return 100;
+                    setTimeout(() => onComplete(), 400); 
                 }
                 return prev + Math.floor(Math.random() * 8) + 2; 
             });

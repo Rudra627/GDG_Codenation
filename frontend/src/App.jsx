@@ -19,8 +19,7 @@ function App() {
   const { user } = useContext(AuthContext);
   const [isLoading, setIsLoading] = useState(true);
 
-  // We handle the actual AuthContext loading state elsewhere, but we can simulate a cool loader here
-  // or use the loader for the entire app mount.
+  
   
   const ProtectedRoute = ({ children, adminOnly = false }) => {
     if (!user) return <Navigate to="/login" />;
