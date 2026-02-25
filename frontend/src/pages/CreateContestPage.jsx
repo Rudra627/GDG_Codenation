@@ -142,7 +142,7 @@ const CreateContestPage = () => {
                         <div>
                             <label className="block text-sm text-[#07fc03] mb-2 uppercase tracking-widest flex items-center gap-2"><Clock size={16} /> Start Time (Local)</label>
                             <input
-                               type="date"
+                                type="datetime-local"
                                 required
                                 className="w-full bg-black/50 border border-gray-700 text-[#07fc03] rounded px-4 py-2 focus:border-[#07fc03] focus:outline-none"
                                 value={startTime}
@@ -152,7 +152,7 @@ const CreateContestPage = () => {
                         <div>
                             <label className="block text-sm text-[#07fc03] mb-2 uppercase tracking-widest flex items-center gap-2"><Clock size={16} /> End Time (Local)</label>
                             <input
-                                type="date"
+                                type="datetime-local"
                                 required
                                 className="w-full bg-black/50 border border-gray-700 text-[#07fc03] rounded px-4 py-2 focus:border-[#07fc03] focus:outline-none"
                                 value={endTime}
@@ -167,19 +167,21 @@ const CreateContestPage = () => {
                         {selectedProblems.length === 0 && <p className="text-gray-500 italic text-sm">No problems selected yet.</p>}
                         <div className="space-y-3">
                             {selectedProblems.map(p => (
-                                <div key={p.id} className="flex justify-between items-center bg-black border border-[#07fc03]/30 p-3 rounded">
+                                <div key={p.id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-black border border-[#07fc03]/30 p-3 rounded gap-4 sm:gap-0">
                                     <div className="flex flex-col">
                                         <span className="text-white font-bold">{p.title}</span>
                                         <span className="text-xs text-gray-400">{p.difficulty}</span>
                                     </div>
-                                    <div className="flex items-center gap-4">
-                                        <div className="flex flex-col items-center">
-                                            <span className="text-xs text-[#07fc03] tracking-widest uppercase">PTS</span>
-                                            <input type="number" className="w-20 bg-gray-900 border border-gray-700 text-center text-white py-1 rounded" value={p.points} onChange={(e) => handlePointsChange(p.id, e.target.value)} />
+                                    <div className="flex items-center justify-between w-full sm:w-auto gap-4 self-end sm:self-auto">
+                                        <div className="flex items-center gap-2 sm:gap-4 ml-auto sm:ml-0">
+                                            <div className="flex flex-col items-center">
+                                                <span className="text-xs text-[#07fc03] tracking-widest uppercase">PTS</span>
+                                                <input type="number" className="w-20 bg-gray-900 border border-gray-700 text-center text-white py-1 rounded" value={p.points} onChange={(e) => handlePointsChange(p.id, e.target.value)} />
+                                            </div>
+                                            <button type="button" onClick={() => handleRemoveProblem(p.id)} className="text-red-500 hover:text-red-400 p-2 border border-transparent hover:border-red-500/30 rounded-full">
+                                                <Trash size={20} />
+                                            </button>
                                         </div>
-                                        <button type="button" onClick={() => handleRemoveProblem(p.id)} className="text-red-500 hover:text-red-400">
-                                            <Trash size={20} />
-                                        </button>
                                     </div>
                                 </div>
                             ))}

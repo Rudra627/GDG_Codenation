@@ -51,8 +51,8 @@ const ProblemsPage = () => {
                 </p>
             </div>
 
-            <div className="w-full max-w-5xl">
-                <div className="glass rounded-xl overflow-hidden">
+            <div className="w-full max-w-5xl mx-auto overflow-x-auto pb-4">
+                <div className="glass rounded-xl overflow-hidden min-w-[700px]">
                     <div className="grid grid-cols-12 gap-4 border-b border-gray-700 bg-gray-800/50 p-4 font-semibold text-gray-300">
                         <div className="col-span-1 text-center">Status</div>
                         <div className="col-span-6 pl-4">Title</div>

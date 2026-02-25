@@ -117,15 +117,15 @@ const ProblemDetail = () => {
     return (
         <div className="flex-grow flex flex-col lg:flex-row h-full">
             {/* Left Pane: Question Description */}
-            <div className="lg:w-1/2 p-6 overflow-y-auto border-r border-gray-700 bg-gray-900">
-                <div className="flex items-center space-x-4 mb-6">
-                    <h1 className="text-3xl font-bold text-gray-100">{problem.id}. {problem.title}</h1>
-                    <span className={`px-3 py-1 text-xs font-semibold rounded-full border ${problem.difficulty === 'Easy' ? 'text-green-400 border-green-400/20 bg-green-400/10' : problem.difficulty === 'Medium' ? 'text-yellow-400 border-yellow-400/20 bg-yellow-400/10' : 'text-red-400 border-red-400/20 bg-red-400/10'}`}>
+            <div className="lg:w-1/2 p-4 sm:p-6 overflow-y-auto border-b lg:border-b-0 lg:border-r border-gray-700 bg-gray-900 min-h-[300px] lg:min-h-0">
+                <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 mb-6">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-100">{problem.id}. {problem.title}</h1>
+                    <span className={`self-start sm:self-auto px-3 py-1 text-xs font-semibold rounded-full border ${problem.difficulty === 'Easy' ? 'text-green-400 border-green-400/20 bg-green-400/10' : problem.difficulty === 'Medium' ? 'text-yellow-400 border-yellow-400/20 bg-yellow-400/10' : 'text-red-400 border-red-400/20 bg-red-400/10'}`}>
                         {problem.difficulty}
                     </span>
                 </div>
                 
-                <div className="prose prose-invert max-w-none text-gray-300 whitespace-pre-wrap">
+                <div className="prose prose-sm sm:prose-base prose-invert max-w-none text-gray-300 whitespace-pre-wrap">
                     {problem.description}
                 </div>
                 
@@ -133,13 +133,13 @@ const ProblemDetail = () => {
             </div>
 
             {/* Right Pane: Code Editor */}
-            <div className="lg:w-1/2 flex flex-col bg-[#1e1e1e]">
+            <div className="lg:w-1/2 flex flex-col bg-[#1e1e1e] min-h-[500px] lg:min-h-0">
                 {/* Editor Header */}
                 <div className="flex items-center justify-between px-4 py-2 bg-gray-800 border-b border-gray-700">
                     <select 
                         value={language} 
                         onChange={handleLanguageChange}
-                        className="bg-gray-700 text-gray-200 text-sm px-3 py-1.5 rounded outline-none border border-gray-600 focus:border-[#07fc03]"
+                        className="bg-gray-700 text-gray-200 text-xs sm:text-sm px-2 sm:px-3 py-1.5 rounded outline-none border border-gray-600 focus:border-[#07fc03]"
                     >
                         <option value="python">Python</option>
                         <option value="c">C</option>
@@ -150,7 +150,7 @@ const ProblemDetail = () => {
                     <button 
                         onClick={submitCode}
                         disabled={submitting}
-                        className="flex items-center space-x-1 bg-green-600 hover:bg-green-500 disabled:bg-gray-600 text-white px-4 py-1.5 rounded-md text-sm font-semibold smooth-transition shadow-lg shadow-green-500/20"
+                        className="flex items-center space-x-1 bg-green-600 hover:bg-green-500 disabled:bg-gray-600 text-white px-3 sm:px-4 py-1.5 rounded-md text-xs sm:text-sm font-semibold smooth-transition shadow-lg shadow-green-500/20"
                     >
                         {submitting ? (
                             <span className="animate-pulse">Running...</span>
@@ -163,7 +163,7 @@ const ProblemDetail = () => {
                     </button>
                 </div>
                 
-                <div className="flex-grow">
+                <div className="flex-grow relative">
                     <Editor
                         height="100%"
                         language={language === 'c++' ? 'cpp' : language}

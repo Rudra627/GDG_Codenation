@@ -243,7 +243,7 @@ const AdminDashboard = () => {
         <div className="flex-grow p-8 max-w-7xl mx-auto w-full">
             <h1 className="text-3xl font-bold mb-8 text-white">Admin Dashboard</h1>
             
-            <div className="flex space-x-4 mb-8">
+            <div className="flex flex-col sm:flex-row gap-4 mb-8">
                 <button 
                     onClick={() => setActiveTab('problems')}
                     className={`px-4 py-2 rounded-lg font-semibold smooth-transition ${activeTab === 'problems' ? 'bg-[#07fc03] text-black' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
@@ -374,86 +374,88 @@ const AdminDashboard = () => {
             )}
 
             {activeTab === 'submissions' && (
-                <div className="glass rounded-xl overflow-hidden">
-                    <table className="w-full text-left">
-                        <thead className="bg-gray-800/80 text-gray-300 border-b border-gray-700 text-sm uppercase tracking-wider">
-                            <tr>
-                                <th className="px-6 py-4">ID</th>
-                                <th className="px-6 py-4">User</th>
-                                <th className="px-6 py-4">Problem</th>
-                                <th className="px-6 py-4">Language</th>
-                                <th className="px-6 py-4">Status</th>
-                                <th className="px-6 py-4">Time</th>
-                                <th className="px-6 py-4">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-700/50 text-gray-300 font-medium">
-                            {submissions.map(s => (
-                                <React.Fragment key={s.id}>
-                                    <tr className="hover:bg-gray-700/30 smooth-transition">
-                                        <td className="px-6 py-4 text-gray-500">#{s.id}</td>
-                                        <td className="px-6 py-4">{s.user_name}</td>
-                                        <td className="px-6 py-4">{s.problem_title}</td>
-                                        <td className="px-6 py-4">{s.language}</td>
-                                        <td className={`px-6 py-4 ${s.status === 'Accepted' ? 'text-green-400' : s.status === 'Pending' ? 'text-yellow-400' : 'text-red-400'}`}>{s.status}</td>
-                                        <td className="px-6 py-4 text-gray-500 text-sm">{new Date(s.submitted_at).toLocaleString()}</td>
-                                        <td className="px-6 py-4">
-                                            <button 
-                                                onClick={() => setExpandedSubmission(expandedSubmission === s.id ? null : s.id)}
-                                                className="bg-gray-800 hover:bg-gray-600 border border-gray-600 px-3 py-1 rounded text-xs uppercase"
-                                            >
-                                                {expandedSubmission === s.id ? 'Close' : 'View Code'}
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    {expandedSubmission === s.id && (
-                                        <tr className="bg-black/30">
-                                            <td colSpan="7" className="p-6 border-b border-[#07fc03]/20">
-                                                <div className="flex flex-col space-y-4">
-                                                    <div className="flex items-center justify-between text-gray-300 bg-gray-900/50 p-3 rounded border border-gray-700">
-                                                        <div>
-                                                            <span className="text-xs text-gray-500 uppercase tracking-widest block mb-1">Submitter</span>
-                                                            <span className="font-bold text-[#07fc03]">{s.user_name}</span> <span className="text-gray-500 text-sm">(ID: {s.user_id})</span>
-                                                        </div>
-                                                        <div className="text-right">
-                                                            <span className="text-xs text-gray-500 uppercase tracking-widest block mb-1">Problem</span>
-                                                            <span className="font-bold text-white">{s.problem_title}</span>
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    <div className="bg-[#1e1e1e] border border-gray-700 p-4 rounded-md overflow-x-auto relative">
-                                                        <div className="absolute top-0 right-0 bg-gray-800 text-xs text-gray-400 px-2 py-1 rounded-bl-md border-b border-l border-gray-700 uppercase tracking-wider">
-                                                            {s.language} Code
-                                                        </div>
-                                                        <pre className="text-gray-300 font-mono text-sm max-h-96 overflow-y-auto w-full whitespace-pre-wrap mt-2">{s.code}</pre>
-                                                    </div>
-                                                    
-                                                    {s.status === 'Pending' && (
-                                                        <div className="flex space-x-4 pt-2">
-                                                            <button 
-                                                                onClick={() => handleUpdateSubmissionStatus(s.id, 'Accepted')}
-                                                                disabled={statusUpdating}
-                                                                className="bg-green-600 hover:bg-green-500 text-white px-6 py-2 rounded-md font-bold uppercase transition disabled:opacity-50"
-                                                            >
-                                                                Approve (Correct)
-                                                            </button>
-                                                            <button 
-                                                                onClick={() => handleUpdateSubmissionStatus(s.id, 'Wrong Answer')}
-                                                                disabled={statusUpdating}
-                                                                className="bg-red-600 hover:bg-red-500 text-white px-6 py-2 rounded-md font-bold uppercase transition disabled:opacity-50"
-                                                            >
-                                                                Reject (Wrong Answer)
-                                                            </button>
-                                                        </div>
-                                                    )}
-                                                </div>
+                <div className="glass rounded-xl overflow-x-auto pb-4">
+                    <div className="min-w-[800px]">
+                        <table className="w-full text-left">
+                            <thead className="bg-gray-800/80 text-gray-300 border-b border-gray-700 text-sm uppercase tracking-wider">
+                                <tr>
+                                    <th className="px-6 py-4">ID</th>
+                                    <th className="px-6 py-4">User</th>
+                                    <th className="px-6 py-4">Problem</th>
+                                    <th className="px-6 py-4">Language</th>
+                                    <th className="px-6 py-4">Status</th>
+                                    <th className="px-6 py-4">Time</th>
+                                    <th className="px-6 py-4">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-700/50 text-gray-300 font-medium">
+                                {submissions.map(s => (
+                                    <React.Fragment key={s.id}>
+                                        <tr className="hover:bg-gray-700/30 smooth-transition">
+                                            <td className="px-6 py-4 text-gray-500">#{s.id}</td>
+                                            <td className="px-6 py-4">{s.user_name}</td>
+                                            <td className="px-6 py-4">{s.problem_title}</td>
+                                            <td className="px-6 py-4">{s.language}</td>
+                                            <td className={`px-6 py-4 ${s.status === 'Accepted' ? 'text-green-400' : s.status === 'Pending' ? 'text-yellow-400' : 'text-red-400'}`}>{s.status}</td>
+                                            <td className="px-6 py-4 text-gray-500 text-sm">{new Date(s.submitted_at).toLocaleString()}</td>
+                                            <td className="px-6 py-4">
+                                                <button 
+                                                    onClick={() => setExpandedSubmission(expandedSubmission === s.id ? null : s.id)}
+                                                    className="bg-gray-800 hover:bg-gray-600 border border-gray-600 px-3 py-1 rounded text-xs uppercase"
+                                                >
+                                                    {expandedSubmission === s.id ? 'Close' : 'View Code'}
+                                                </button>
                                             </td>
                                         </tr>
-                                    )}
-                                </React.Fragment>
-                            ))}
-                        </tbody>
-                    </table>
+                                        {expandedSubmission === s.id && (
+                                            <tr className="bg-black/30">
+                                                <td colSpan="7" className="p-6 border-b border-[#07fc03]/20">
+                                                    <div className="flex flex-col space-y-4">
+                                                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 text-gray-300 bg-gray-900/50 p-3 rounded border border-gray-700">
+                                                            <div>
+                                                                <span className="text-xs text-gray-500 uppercase tracking-widest block mb-1">Submitter</span>
+                                                                <span className="font-bold text-[#07fc03]">{s.user_name}</span> <span className="text-gray-500 text-sm">(ID: {s.user_id})</span>
+                                                            </div>
+                                                            <div className="sm:text-right">
+                                                                <span className="text-xs text-gray-500 uppercase tracking-widest block mb-1">Problem</span>
+                                                                <span className="font-bold text-white">{s.problem_title}</span>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div className="bg-[#1e1e1e] border border-gray-700 p-4 rounded-md overflow-x-auto relative">
+                                                            <div className="absolute top-0 right-0 bg-gray-800 text-xs text-gray-400 px-2 py-1 rounded-bl-md border-b border-l border-gray-700 uppercase tracking-wider">
+                                                                {s.language} Code
+                                                            </div>
+                                                            <pre className="text-gray-300 font-mono text-sm max-h-96 overflow-y-auto w-full whitespace-pre-wrap mt-2">{s.code}</pre>
+                                                        </div>
+                                                        
+                                                        {s.status === 'Pending' && (
+                                                            <div className="flex flex-col sm:flex-row gap-4 pt-2">
+                                                                <button 
+                                                                    onClick={() => handleUpdateSubmissionStatus(s.id, 'Accepted')}
+                                                                    disabled={statusUpdating}
+                                                                    className="bg-green-600 hover:bg-green-500 text-white px-6 py-2 rounded-md font-bold uppercase transition disabled:opacity-50"
+                                                                >
+                                                                    Approve (Correct)
+                                                                </button>
+                                                                <button 
+                                                                    onClick={() => handleUpdateSubmissionStatus(s.id, 'Wrong Answer')}
+                                                                    disabled={statusUpdating}
+                                                                    className="bg-red-600 hover:bg-red-500 text-white px-6 py-2 rounded-md font-bold uppercase transition disabled:opacity-50"
+                                                                >
+                                                                    Reject (Wrong Answer)
+                                                                </button>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </React.Fragment>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             )}
 

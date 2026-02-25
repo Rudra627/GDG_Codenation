@@ -158,9 +158,9 @@ const NotesPage = () => {
                             ) : (
                                 notes.map(note => (
                                     <div key={note.id} className="glass p-6 rounded-xl hover:shadow-[0_0_15px_rgba(7,252,3,0.15)] transition-shadow border border-transparent hover:border-[#07fc03]/30">
-                                        <div className="flex justify-between items-start mb-4">
-                                            <h3 className="text-2xl font-bold text-white group-hover:text-[#07fc03] transition-colors">{note.title}</h3>
-                                            <span className="bg-[#07fc03]/10 text-[#07fc03] border border-[#07fc03]/30 px-3 py-1 rounded-full text-xs font-medium shrink-0">
+                                        <div className="flex flex-col sm:flex-row justify-between items-start mb-4 gap-3 sm:gap-4">
+                                            <h3 className="text-xl sm:text-2xl font-bold text-white group-hover:text-[#07fc03] transition-colors">{note.title}</h3>
+                                            <span className="bg-[#07fc03]/10 text-[#07fc03] border border-[#07fc03]/30 px-3 py-1 rounded-full text-[10px] sm:text-xs font-medium shrink-0">
                                                 {note.topic}
                                             </span>
                                         </div>

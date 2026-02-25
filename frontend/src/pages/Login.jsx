@@ -43,16 +43,16 @@ const Login = () => {
     }
 
     return (
-        <div className="flex-grow flex items-center justify-center p-6">
-            <div className="glass w-full max-w-md p-8 rounded-2xl">
+        <div className="flex-grow flex items-center justify-center p-4 sm:p-6">
+            <div className="glass w-full max-w-md p-6 sm:p-8 rounded-2xl">
                 <div className="text-center mb-8">
-                    <h2 className="text-3xl font-bold text-white mb-2">Welcome Back</h2>
-                    <p className="text-gray-400">Sign in to continue solving problems</p>
+                    <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">Welcome Back</h2>
+                    <p className="text-sm sm:text-base text-gray-400">Sign in to continue solving problems</p>
                 </div>
                 
                 {error && <div className="bg-red-500/10 border border-red-500/50 text-red-400 p-3 rounded-md mb-6 text-sm">{error}</div>}
 
-                <form onSubmit={handleSubmit} className="space-y-5 mb-6">
+                <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5 mb-6">
                     <div>
                         <label className="block text-sm font-medium text-gray-300 mb-1">Email</label>
                         <input 

@@ -176,19 +176,19 @@ const ContestDetailPage = () => {
                                 <Link 
                                     to={`/problems/${p.id}?contestId=${contest.id}`} 
                                     key={p.id}
-                                    className="flex justify-between items-center bg-[#0a0a0a] border border-[#07fc03]/20 hover:border-[#07fc03]/80 p-5 rounded-lg smooth-transition group"
+                                    className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-[#0a0a0a] border border-[#07fc03]/20 hover:border-[#07fc03]/80 p-4 sm:p-5 rounded-lg smooth-transition group gap-4 sm:gap-0"
                                 >
-                                    <div className="flex items-center gap-6">
-                                        <div className="text-2xl font-bold text-gray-700 group-hover:text-[#07fc03]/50 w-8">{idx + 1}</div>
+                                    <div className="flex items-center gap-4 sm:gap-6">
+                                        <div className="text-xl sm:text-2xl font-bold text-gray-700 group-hover:text-[#07fc03]/50 w-6 sm:w-8">{idx + 1}</div>
                                         <div>
-                                            <h3 className="text-xl font-bold text-gray-200 group-hover:text-white">{p.title}</h3>
-                                            <span className={`text-xs uppercase tracking-widest ${p.difficulty==='Easy'?'text-green-500':p.difficulty==='Medium'?'text-yellow-500':'text-red-500'}`}>
+                                            <h3 className="text-lg sm:text-xl font-bold text-gray-200 group-hover:text-white">{p.title}</h3>
+                                            <span className={`text-[10px] sm:text-xs uppercase tracking-widest ${p.difficulty==='Easy'?'text-green-500':p.difficulty==='Medium'?'text-yellow-500':'text-red-500'}`}>
                                                 {p.difficulty}
                                             </span>
                                         </div>
                                     </div>
-                                    <div className="flex flex-col items-end">
-                                        <span className="text-[#07fc03] tracking-widest font-bold">{p.points} PTS</span>
+                                    <div className="flex flex-col items-end self-end sm:self-auto">
+                                        <span className="text-[#07fc03] tracking-widest font-bold text-sm sm:text-base">{p.points} PTS</span>
                                     </div>
                                 </Link>
                             ))
@@ -199,37 +199,39 @@ const ContestDetailPage = () => {
                 )}
 
                 {status !== 'upcoming' && activeTab === 'leaderboard' && (
-                    <div className="border border-gray-800 bg-[#0a0a0a] rounded-xl overflow-hidden">
-                        <table className="w-full text-left">
-                            <thead className="bg-black border-b border-[#07fc03]/30 text-xs uppercase tracking-widest text-[#07fc03]">
-                                <tr>
-                                    <th className="px-6 py-4">Rank</th>
-                                    <th className="px-6 py-4">Hacker</th>
-                                    <th className="px-6 py-4">Score</th>
-                                    <th className="px-6 py-4">Penalty (Mins)</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-800">
-                                {leaderboard.map((lb, idx) => (
-                                    <tr key={lb.user_id} className="hover:bg-[#07fc03]/5 smooth-transition">
-                                        <td className="px-6 py-4">
-                                            {idx === 0 ? <span className="text-yellow-500 font-bold text-xl drop-shadow-[0_0_10px_rgba(255,215,0,0.8)]">#1</span> 
-                                            : idx === 1 ? <span className="text-gray-300 font-bold text-lg">#2</span>
-                                            : idx === 2 ? <span className="text-amber-700 font-bold text-lg">#3</span>
-                                            : <span className="text-gray-500 font-bold">#{idx + 1}</span>}
-                                        </td>
-                                        <td className="px-6 py-4 text-white font-bold">{lb.name}</td>
-                                        <td className="px-6 py-4 text-[#07fc03] font-bold">{lb.score}</td>
-                                        <td className="px-6 py-4 text-red-400">{lb.penalty}</td>
-                                    </tr>
-                                ))}
-                                {leaderboard.length === 0 && (
+                    <div className="border border-gray-800 bg-[#0a0a0a] rounded-xl overflow-x-auto">
+                        <div className="min-w-[600px]">
+                            <table className="w-full text-left">
+                                <thead className="bg-black border-b border-[#07fc03]/30 text-xs uppercase tracking-widest text-[#07fc03]">
                                     <tr>
-                                        <td colSpan="4" className="px-6 py-12 text-center text-gray-500">No participants registered or ranked yet.</td>
+                                        <th className="px-6 py-4">Rank</th>
+                                        <th className="px-6 py-4">Hacker</th>
+                                        <th className="px-6 py-4">Score</th>
+                                        <th className="px-6 py-4">Penalty (Mins)</th>
                                     </tr>
-                                )}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody className="divide-y divide-gray-800">
+                                    {leaderboard.map((lb, idx) => (
+                                        <tr key={lb.user_id} className="hover:bg-[#07fc03]/5 smooth-transition">
+                                            <td className="px-6 py-4">
+                                                {idx === 0 ? <span className="text-yellow-500 font-bold text-xl drop-shadow-[0_0_10px_rgba(255,215,0,0.8)]">#1</span> 
+                                                : idx === 1 ? <span className="text-gray-300 font-bold text-lg">#2</span>
+                                                : idx === 2 ? <span className="text-amber-700 font-bold text-lg">#3</span>
+                                                : <span className="text-gray-500 font-bold">#{idx + 1}</span>}
+                                            </td>
+                                            <td className="px-6 py-4 text-white font-bold">{lb.name}</td>
+                                            <td className="px-6 py-4 text-[#07fc03] font-bold">{lb.score}</td>
+                                            <td className="px-6 py-4 text-red-400">{lb.penalty}</td>
+                                        </tr>
+                                    ))}
+                                    {leaderboard.length === 0 && (
+                                        <tr>
+                                            <td colSpan="4" className="px-6 py-12 text-center text-gray-500">No participants registered or ranked yet.</td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 )}
             </div>

@@ -97,8 +97,8 @@ const HomePage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     <div className="bg-[#0a0a0a] border border-[#07fc03]/20 p-8 rounded-xl text-center group hover:border-[#07fc03]/60 smooth-transition">
                         <Target className="text-[#07fc03]/50 mx-auto mb-6 group-hover:text-[#07fc03] transition-colors" size={32} />
-                        <h3 className="text-lg font-bold text-[#07fc03] mb-2 uppercase">Curated</h3>
-                        <p className="text-gray-500 text-sm leading-relaxed">Mimic real-world software interviews.</p>
+                        <h3 className="text-lg font-bold text-[#07fc03] mb-2 uppercase">Skills</h3>
+                        <p className="text-gray-500 text-sm leading-relaxed">Start Improve your logic and improve your coding skills</p>
                     </div>
                     <div className="bg-[#0a0a0a] border border-[#07fc03]/20 p-8 rounded-xl text-center group hover:border-[#07fc03]/60 smooth-transition">
                         <Zap className="text-[#07fc03]/50 mx-auto mb-6 group-hover:text-[#07fc03] transition-colors" size={32} />
@@ -108,7 +108,17 @@ const HomePage = () => {
                     <div className="bg-[#0a0a0a] border border-[#07fc03]/20 p-8 rounded-xl text-center group hover:border-[#07fc03]/60 smooth-transition">
                         <Users className="text-[#07fc03]/50 mx-auto mb-6 group-hover:text-[#07fc03] transition-colors" size={32} />
                         <h3 className="text-lg font-bold text-[#07fc03] mb-2 uppercase">Community</h3>
-                        <p className="text-gray-500 text-sm leading-relaxed">Track progress with thousands.</p>
+                        <p className="text-gray-500 text-sm leading-relaxed">join our gdg whatsapp group where you can interact with as</p>
+
+<a 
+    href="https://chat.whatsapp.com/IDhNDQ4qxgA26mzbxvndIo" 
+    target="_blank" 
+    rel="noopener noreferrer" 
+    className="inline-block bg-[#07fc03] text-black px-6 py-2 rounded-full mt-4 hover:bg-[#07fc03]/80 transition-colors font-bold"
+>
+    Join Group
+</a>
+
                     </div>
                 </div>
             </section>
@@ -196,7 +206,7 @@ const HomePage = () => {
                         <h4 className="text-[#07fc03] text-sm font-bold uppercase tracking-widest mb-1">Contact Terminal</h4>
                         <div className="flex items-center space-x-3 text-gray-400 hover:text-white smooth-transition text-sm">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#07fc03]"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                            <span>ping@codenation.gdg</span>
+                            <span>gdg@gietu.edu</span>
                         </div>
                         <div className="flex items-center space-x-3 text-gray-400 hover:text-white smooth-transition text-sm">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#07fc03]"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>

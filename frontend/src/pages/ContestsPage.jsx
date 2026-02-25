@@ -76,7 +76,7 @@ const ContestsPage = () => {
     return (
         <div className="flex-grow flex flex-col items-center bg-black relative p-6 pt-12 md:p-12 font-mono min-h-screen">
             <div className="w-full max-w-6xl relative z-10">
-                <div className="flex justify-between items-center mb-10 border-b border-[#07fc03]/30 pb-6">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10 border-b border-[#07fc03]/30 pb-6">
                     <div>
                         <h1 className="text-3xl md:text-5xl font-bold text-white flex items-center gap-4 uppercase tracking-tight">
                             <Trophy className="text-[#07fc03]" size={40} />
