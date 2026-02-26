@@ -40,7 +40,7 @@ const HomePage = () => {
                     </h1>
                     
                     <p className="text-lg md:text-xl text-gray-400 mb-12 max-w-2xl mx-auto lowercase">
-                        Start Building Your Logic and Improve Your Coding Skills 
+                        Starcdt Building Your Logic and Improve Your Coding Skills 
                     </p>
                     
                     <div className="flex justify-center mb-8">

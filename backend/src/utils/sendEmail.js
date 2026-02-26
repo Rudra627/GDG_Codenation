@@ -1,0 +1,26 @@
+const nodemailer = require('nodemailer');
+
+const sendEmail = async (options) => {
+    // Create a transporter
+    const transporter = nodemailer.createTransport({
+        service: 'gmail', // Use your preferred service
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS,
+        },
+    });
+
+    // Define the email options
+    const mailOptions = {
+        from: `Kaamigo <${process.env.EMAIL_USER}>`,
+        to: options.email,
+        subject: options.subject,
+        text: options.message,
+        // html: options.html, // Optional: if you want to send HTML emails
+    };
+
+    // Send the email
+    await transporter.sendMail(mailOptions);
+};
+
+module.exports = sendEmail;

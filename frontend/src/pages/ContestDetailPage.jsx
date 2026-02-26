@@ -7,12 +7,14 @@ import Loader from '../components/Loader';
 
 const ContestDetailPage = () => {
     const { id } = useParams();
-    const { token } = useContext(AuthContext);
+    const { user, token } = useContext(AuthContext);
     const [contest, setContest] = useState(null);
     const [leaderboard, setLeaderboard] = useState([]);
     const [loading, setLoading] = useState(true);
     const [joining, setJoining] = useState(false);
+    const [sendingReminder, setSendingReminder] = useState(false);
     const [joinMessage, setJoinMessage] = useState('');
+    const [reminderMessage, setReminderMessage] = useState('');
     const [activeTab, setActiveTab] = useState('problems'); // 'problems' or 'leaderboard'
     const [timeRemaining, setTimeRemaining] = useState('');
 
@@ -93,6 +95,24 @@ const ContestDetailPage = () => {
         }
     };
 
+    const handleSendReminder = async () => {
+        if (!window.confirm("Are you sure you want to email a reminder to EVERY participant?")) return;
+        
+        setSendingReminder(true);
+        setReminderMessage('');
+        try {
+            const tk = token || localStorage.getItem('token');
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/contests/${id}/remind`, {}, {
+                headers: { Authorization: `Bearer ${tk}` }
+            });
+            setReminderMessage(`Success! Sent ${res.data.successCount} emails. (${res.data.failCount} failed).`);
+        } catch (err) {
+            setReminderMessage(err.response?.data?.message || 'Failed to send reminders');
+        } finally {
+            setSendingReminder(false);
+        }
+    };
+
     if (loading) return <Loader />;
     if (!contest) return <div className="text-white p-12 text-center">Contest not found.</div>;
 
@@ -125,10 +145,23 @@ const ContestDetailPage = () => {
                             <p className="text-gray-400 mt-4 max-w-2xl leading-relaxed">{contest.description}</p>
                         </div>
                         
-                        <div className="mt-6 md:mt-0 flex flex-col items-end">
+                        <div className="mt-6 md:mt-0 flex flex-col items-end gap-3">
                             <div className="text-2xl md:text-3xl font-bold text-[#07fc03] tracking-widest bg-black/50 border border-[#07fc03]/50 px-6 py-3 rounded-lg shadow-[0_0_15px_rgba(7,252,3,0.2)]">
                                 {timeRemaining || "CALCULATING..."}
                             </div>
+                            
+                            {user && user.role === 'Admin' && status === 'upcoming' && (
+                                <div className="flex flex-col items-end w-full mt-2">
+                                     <button 
+                                        onClick={handleSendReminder}
+                                        disabled={sendingReminder}
+                                        className="text-xs bg-red-900/50 hover:bg-red-800 text-red-200 border border-red-500 py-1 px-3 rounded transition-all uppercase tracking-widest disabled:opacity-50"
+                                     >
+                                         {sendingReminder ? 'SENDING EMAILS...' : 'ADMIN: SEND REMINDER (EMAIL)'}
+                                     </button>
+                                     {reminderMessage && <span className="text-xs text-red-400 mt-1">{reminderMessage}</span>}
+                                </div>
+                            )}
                         </div>
                     </div>
                     

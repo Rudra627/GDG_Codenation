@@ -10,7 +10,9 @@ const Loader = ({ onComplete }) => {
                     clearInterval(interval);
                     setTimeout(() => onComplete(), 400); 
                 }
-                return prev + Math.floor(Math.random() *7) + 2; 
+
+                return Math.min(prev + Math.floor(Math.random() * 6) + 2, 100);
+
             });
         }, 80); 
 

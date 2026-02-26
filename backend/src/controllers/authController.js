@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const pool = require('../config/db');
-
+const sendEmail = require('../utils/sendEmail');
 // Register a new user
 exports.register = async (req, res) => {
     try {
@@ -22,6 +22,18 @@ exports.register = async (req, res) => {
             'INSERT INTO users (name, email, password) VALUES (?, ?, ?)',
             [name, email, hashedPassword]
         );
+
+        // Send Welcome Email
+        try {
+            await sendEmail({
+                email,
+                subject: 'Welcome to Kaamigo!',
+                message: `Hi ${name},\n\nWelcome to Kaamigo! We are thrilled to have you on board. Get ready to explore contests, solve problems, and climb the leaderboard.\n\nHappy Coding!\nThe Kaamigo Team`
+            });
+        } catch (emailError) {
+            console.error("Error sending welcome email:", emailError);
+            // Registration still successful even if email fails
+        }
 
         res.status(201).json({ message: 'User registered successfully!', userId: result.insertId });
 
@@ -173,6 +185,17 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
                 [name, email, null, picture] // Null password for OAuth users
             );
             user = { id: result.insertId, name, email, role: 'User', profile_image_url: picture };
+            
+            // Send Welcome Email for new Google Auth users
+            try {
+                await sendEmail({
+                    email,
+                    subject: 'Welcome to Kaamigo!',
+                    message: `Hi ${name},\n\nWelcome to Kaamigo! We are thrilled to have you on board via Google Sign-In. Get ready to explore contests, solve problems, and climb the leaderboard.\n\nHappy Coding!\nThe Kaamigo Team`
+                });
+            } catch (emailError) {
+                console.error("Error sending welcome email (Google Auth):", emailError);
+            }
         } else {
             user = users[0];
             // Optionally, update their profile picture if they login with Google again and it's missing/changed
