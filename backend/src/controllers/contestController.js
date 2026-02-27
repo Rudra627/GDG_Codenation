@@ -184,7 +184,7 @@ exports.sendContestReminder = async (req, res) => {
 
         for (const user of participants) {
             try {
-                const message = `Hi ${user.name},\n\nFriendly reminder: The contest "${contest.title}" is starting soon at ${contestDate}.\n\nGet ready and good luck!\n\nThe Kaamigo Team`;
+                const message = `Hi ${user.name},\n\nFriendly reminder: The contest "${contest.title}" is starting soon at ${contestDate}.\n\nGet ready and good luck!\n\nThe GDG Codenation Team`;
                 await sendEmail({
                     email: user.email,
                     subject: `Reminder: Contest "${contest.title}" Is Starting Soon!`,

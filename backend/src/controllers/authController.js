@@ -27,8 +27,8 @@ exports.register = async (req, res) => {
         try {
             await sendEmail({
                 email,
-                subject: 'Welcome to Kaamigo!',
-                message: `Hi ${name},\n\nWelcome to Kaamigo! We are thrilled to have you on board. Get ready to explore contests, solve problems, and climb the leaderboard.\n\nHappy Coding!\nThe Kaamigo Team`
+                subject: 'Welcome to GDG Codenation!',
+                message: `Hi ${name},\n\nWelcome to GDG Codenation! We are thrilled to have you on board. Get ready to explore contests, solve problems, and climb the leaderboard.\n\nHappy Coding!\nThe GDG Codenation Team`
             });
         } catch (emailError) {
             console.error("Error sending welcome email:", emailError);
@@ -190,8 +190,8 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
             try {
                 await sendEmail({
                     email,
-                    subject: 'Welcome to Kaamigo!',
-                    message: `Hi ${name},\n\nWelcome to Kaamigo! We are thrilled to have you on board via Google Sign-In. Get ready to explore contests, solve problems, and climb the leaderboard.\n\nHappy Coding!\nThe Kaamigo Team`
+                    subject: 'Welcome to GDG Codenation!',
+                    message: `Hi ${name},\n\nWelcome to GDG Codenation! We are thrilled to have you on board via Google Sign-In. Get ready to explore contests, solve problems, and climb the leaderboard.\n\nHappy Coding!\nThe GDG Codenation Team`
                 });
             } catch (emailError) {
                 console.error("Error sending welcome email (Google Auth):", emailError);

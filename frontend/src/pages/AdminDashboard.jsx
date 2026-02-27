@@ -6,6 +6,13 @@ const AdminDashboard = () => {
     const [problems, setProblems] = useState([]);
     const [submissions, setSubmissions] = useState([]);
     const [notes, setNotes] = useState([]);
+    const [users, setUsers] = useState([]);
+    
+    // User Management State
+    const [selectedUserIds, setSelectedUserIds] = useState([]);
+    const [showReminderModal, setShowReminderModal] = useState(false);
+    const [reminderData, setReminderData] = useState({ type: 'Contest Reminder', subject: '', message: '' });
+    const [sendingReminder, setSendingReminder] = useState(false);
     
     // Form state
     const [formData, setFormData] = useState({ title: '', description: '', difficulty: 'Easy' });
@@ -36,6 +43,10 @@ const AdminDashboard = () => {
             } else if (activeTab === 'notes') {
                 const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/notes`, { headers });
                 setNotes(res.data);
+            } else if (activeTab === 'users') {
+                const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/users`, { headers });
+                setUsers(res.data);
+                setSelectedUserIds([]); // reset selection on fetch
             }
         } catch (error) {
             console.error("Fetch error", error);
@@ -239,6 +250,80 @@ const AdminDashboard = () => {
         }
     };
 
+    // --- User Management Methods ---
+    const handleSelectAllUsers = (e) => {
+        if (e.target.checked) {
+            setSelectedUserIds(users.map(u => u.id));
+        } else {
+            setSelectedUserIds([]);
+        }
+    };
+
+    const handleSelectUser = (id) => {
+        if (selectedUserIds.includes(id)) {
+            setSelectedUserIds(selectedUserIds.filter(userId => userId !== id));
+        } else {
+            setSelectedUserIds([...selectedUserIds, id]);
+        }
+    };
+
+    const handleReminderTypeChange = (e) => {
+        const type = e.target.value;
+        let defaultSubject = '';
+        let defaultMessage = '';
+
+        if (type === 'Contest Reminder') {
+            defaultSubject = 'Upcoming Contest Reminder on GDG Codenation!';
+
+            defaultMessage = 'Hello ${{name}},\n\nJust a reminder that a new contest is starting soon on GDG Codenation. Log in to check the details and register.\n\nHappy Coding,\nThe GDG Codenation Team';
+
+        } else if (type === 'Daily Challenge') {
+            defaultSubject = 'Your Daily Coding Challenge is Ready!';
+            defaultMessage = 'Hello,\n\nYour new daily challenge is waiting for you on GDG Codenation. Can you solve it?\n\nKeep up the streak,\nThe GDG Codenation Team';
+        }
+
+        setReminderData({ type, subject: defaultSubject, message: defaultMessage });
+    };
+
+    const handleSendReminder = async (e) => {
+        e.preventDefault();
+        setSendingReminder(true);
+        setMessage('');
+
+        const token = localStorage.getItem('token');
+        try {
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/users/send-reminders`, {
+                userIds: selectedUserIds,
+                subject: reminderData.subject,
+                message: reminderData.message
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            setMessage(res.data.message);
+            setShowReminderModal(false);
+            setReminderData({ type: 'Contest Reminder', subject: '', message: '' });
+            setSelectedUserIds([]); // Clear selection after sending
+        } catch (error) {
+            console.error("Error sending reminder:", error);
+            setMessage(error.response?.data?.message || 'Error sending reminders');
+        } finally {
+            setSendingReminder(false);
+        }
+    };
+
+    // Helper to run once on modal open to set defaults if empty
+    const openReminderModal = () => {
+        if (!reminderData.subject && reminderData.type === 'Contest Reminder') {
+            setReminderData(prev => ({
+                ...prev,
+                subject: 'Upcoming Contest Reminder on GDG Codenation!',
+                message: 'Hello,\n\nJust a reminder that a new contest is starting soon on GDG Codenation. Log in to check the details and register.\n\nHappy Coding,\nThe GDG Codenation Team'
+            }));
+        }
+        setShowReminderModal(true);
+    };
+
     return (
         <div className="flex-grow p-8 max-w-7xl mx-auto w-full">
             <h1 className="text-3xl font-bold mb-8 text-white">Admin Dashboard</h1>
@@ -261,6 +346,12 @@ const AdminDashboard = () => {
                     className={`px-4 py-2 rounded-lg font-semibold smooth-transition ${activeTab === 'notes' ? 'bg-[#07fc03] text-black' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
                 >
                     Manage Notes
+                </button>
+                <button 
+                    onClick={() => setActiveTab('users')}
+                    className={`px-4 py-2 rounded-lg font-semibold smooth-transition ${activeTab === 'users' ? 'bg-[#07fc03] text-black' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
+                >
+                    Manage Users
                 </button>
             </div>
 
@@ -531,6 +622,149 @@ const AdminDashboard = () => {
                                 ))
                             )}
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Manage Users Tab Data */}
+            {activeTab === 'users' && (
+                <div className="glass rounded-xl overflow-hidden pb-4">
+                    <div className="p-4 flex justify-between items-center bg-gray-900/50 border-b border-gray-700">
+                        <h2 className="text-xl font-bold text-gray-100">Registered Users ({users.length})</h2>
+                        <button
+                            onClick={openReminderModal}
+                            disabled={selectedUserIds.length === 0}
+                            className="bg-[#07fc03] hover:bg-[#07fc03]/80 text-black px-4 py-2 rounded shadow-lg smooth-transition font-bold disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                        >
+                            <span>Send Email Reminder ({selectedUserIds.length})</span>
+                        </button>
+                    </div>
+
+                    <div className="overflow-x-auto min-w-[800px]">
+                        <table className="w-full text-left">
+                            <thead className="bg-gray-800/80 text-gray-300 border-b border-gray-700 text-sm uppercase tracking-wider">
+                                <tr>
+                                    <th className="px-6 py-4 w-12 text-center">
+                                        <input 
+                                            type="checkbox" 
+                                            className="w-4 h-4 rounded bg-gray-900 border-gray-700 text-[#07fc03] focus:ring-[#07fc03]"
+                                            onChange={handleSelectAllUsers}
+                                            checked={users.length > 0 && selectedUserIds.length === users.length}
+                                        />
+                                    </th>
+                                    <th className="px-6 py-4">ID</th>
+                                    <th className="px-6 py-4">Name</th>
+                                    <th className="px-6 py-4">Email</th>
+                                    <th className="px-6 py-4">Role</th>
+                                    <th className="px-6 py-4">Joined At</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-700/50 text-gray-300 font-medium">
+                                {users.length === 0 ? (
+                                    <tr>
+                                        <td colSpan="6" className="px-6 py-8 text-center text-gray-500">No users found</td>
+                                    </tr>
+                                ) : (
+                                    users.map(u => (
+                                        <tr key={u.id} className="hover:bg-gray-700/30 smooth-transition">
+                                            <td className="px-6 py-4 text-center">
+                                                <input 
+                                                    type="checkbox" 
+                                                    className="w-4 h-4 rounded bg-gray-900 border-gray-700 text-[#07fc03] focus:ring-[#07fc03]"
+                                                    checked={selectedUserIds.includes(u.id)}
+                                                    onChange={() => handleSelectUser(u.id)}
+                                                />
+                                            </td>
+                                            <td className="px-6 py-4 text-gray-500">#{u.id}</td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-3">
+                                                    {u.profile_image_url ? (
+                                                        <img src={u.profile_image_url.startsWith('http') ? u.profile_image_url : `${import.meta.env.VITE_API_URL}${u.profile_image_url}`} alt="Avatar" className="w-8 h-8 rounded-full border border-gray-600" />
+                                                    ) : (
+                                                        <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-xs font-bold">{u.name.charAt(0).toUpperCase()}</div>
+                                                    )}
+                                                    <span className="font-bold text-white">{u.name}</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 text-gray-400">{u.email}</td>
+                                            <td className="px-6 py-4">
+                                                <span className={`px-2 py-1 rounded text-xs uppercase tracking-wider ${u.role === 'Admin' ? 'bg-purple-900/50 text-purple-400 border border-purple-500/30' : 'bg-gray-800 text-gray-400'}`}>
+                                                    {u.role}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 text-gray-500 text-sm">{new Date(u.created_at).toLocaleDateString()}</td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            )}
+
+            {/* Email Reminder Modal */}
+            {showReminderModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+                    <div className="bg-[#111] border border-gray-700 rounded-xl max-w-lg w-full p-6 shadow-2xl relative">
+                        <button 
+                            onClick={() => setShowReminderModal(false)}
+                            className="absolute top-4 right-4 text-gray-400 hover:text-white"
+                        >
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                        
+                        <h2 className="text-2xl font-bold text-white mb-2">Send Reminder</h2>
+                        <p className="text-gray-400 text-sm mb-6">Sending to <strong className="text-[#07fc03]">{selectedUserIds.length}</strong> selected user(s).</p>
+                        
+                        <form onSubmit={handleSendReminder} className="space-y-4">
+                            <div>
+                                <label className="block text-sm text-gray-400 mb-1">Template Type</label>
+                                <select 
+                                    className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white focus:border-[#07fc03] focus:outline-none"
+                                    value={reminderData.type}
+                                    onChange={handleReminderTypeChange}
+                                >
+                                    <option>Contest Reminder</option>
+                                    <option>Daily Challenge</option>
+                                    <option>Custom Text</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm text-gray-400 mb-1">Subject</label>
+                                <input 
+                                    required 
+                                    type="text" 
+                                    className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white focus:border-[#07fc03] focus:outline-none" 
+                                    value={reminderData.subject} 
+                                    onChange={e => setReminderData({...reminderData, subject: e.target.value})} 
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm text-gray-400 mb-1">Message</label>
+                                <textarea 
+                                    required 
+                                    rows="6" 
+                                    className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white focus:border-[#07fc03] focus:outline-none custom-scrollbar" 
+                                    value={reminderData.message} 
+                                    onChange={e => setReminderData({...reminderData, message: e.target.value})}
+                                ></textarea>
+                            </div>
+                            
+                            <div className="pt-4 flex justify-end space-x-3">
+                                <button type="button" onClick={() => setShowReminderModal(false)} className="text-gray-400 hover:text-white px-4 py-2">
+                                    Cancel
+                                </button>
+                                <button 
+                                    type="submit" 
+                                    disabled={sendingReminder}
+                                    className="bg-[#07fc03] hover:bg-[#07fc03]/80 text-black px-6 py-2 rounded shadow-lg font-bold flex items-center justify-center disabled:opacity-50"
+                                >
+                                    {sendingReminder ? 'Sending...' : 'Send Emails'}
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             )}

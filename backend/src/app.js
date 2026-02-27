@@ -23,6 +23,7 @@ const problemRoutes = require('./routes/problemRoutes');
 const submissionRoutes = require('./routes/submissionRoutes');
 const noteRoutes = require('./routes/noteRoutes');
 const contestRoutes = require('./routes/contestRoutes');
+const userRoutes = require('./routes/userRoutes');
 
 // Use Routes
 app.use('/api/auth', authRoutes);
@@ -30,6 +31,7 @@ app.use('/api/problems', problemRoutes);
 app.use('/api/submissions', submissionRoutes);
 app.use('/api/notes', noteRoutes);
 app.use('/api/contests', contestRoutes);
+app.use('/api/users', userRoutes);
 
 // Global Error Handler
 app.use((err, req, res, next) => {
