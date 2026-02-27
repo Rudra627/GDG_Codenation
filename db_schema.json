@@ -1,0 +1,280 @@
+
+--- SCHEMA FOR contest_participants ---
+[
+  {
+    "Field": "contest_id",
+    "Type": "int",
+    "Null": "NO"
+  },
+  {
+    "Field": "user_id",
+    "Type": "int",
+    "Null": "NO"
+  },
+  {
+    "Field": "joined_at",
+    "Type": "timestamp",
+    "Null": "YES"
+  },
+  {
+    "Field": "score",
+    "Type": "int",
+    "Null": "YES"
+  },
+  {
+    "Field": "penalty",
+    "Type": "int",
+    "Null": "YES"
+  }
+]
+--- SCHEMA FOR contest_problems ---
+[
+  {
+    "Field": "contest_id",
+    "Type": "int",
+    "Null": "NO"
+  },
+  {
+    "Field": "problem_id",
+    "Type": "int",
+    "Null": "NO"
+  },
+  {
+    "Field": "points",
+    "Type": "int",
+    "Null": "YES"
+  }
+]
+--- SCHEMA FOR contests ---
+[
+  {
+    "Field": "id",
+    "Type": "int",
+    "Null": "NO"
+  },
+  {
+    "Field": "title",
+    "Type": "varchar(255)",
+    "Null": "NO"
+  },
+  {
+    "Field": "description",
+    "Type": "text",
+    "Null": "YES"
+  },
+  {
+    "Field": "start_time",
+    "Type": "timestamp",
+    "Null": "NO"
+  },
+  {
+    "Field": "end_time",
+    "Type": "timestamp",
+    "Null": "NO"
+  },
+  {
+    "Field": "created_by",
+    "Type": "int",
+    "Null": "YES"
+  },
+  {
+    "Field": "created_at",
+    "Type": "timestamp",
+    "Null": "YES"
+  }
+]
+--- SCHEMA FOR notes ---
+[
+  {
+    "Field": "id",
+    "Type": "int",
+    "Null": "NO"
+  },
+  {
+    "Field": "title",
+    "Type": "varchar(255)",
+    "Null": "NO"
+  },
+  {
+    "Field": "topic",
+    "Type": "varchar(255)",
+    "Null": "NO"
+  },
+  {
+    "Field": "content",
+    "Type": "text",
+    "Null": "NO"
+  },
+  {
+    "Field": "created_at",
+    "Type": "timestamp",
+    "Null": "YES"
+  },
+  {
+    "Field": "file_url",
+    "Type": "varchar(255)",
+    "Null": "YES"
+  }
+]
+--- SCHEMA FOR problems ---
+[
+  {
+    "Field": "id",
+    "Type": "int",
+    "Null": "NO"
+  },
+  {
+    "Field": "title",
+    "Type": "varchar(255)",
+    "Null": "NO"
+  },
+  {
+    "Field": "description",
+    "Type": "text",
+    "Null": "NO"
+  },
+  {
+    "Field": "difficulty",
+    "Type": "enum('Easy','Medium','Hard')",
+    "Null": "NO"
+  },
+  {
+    "Field": "created_by",
+    "Type": "int",
+    "Null": "YES"
+  },
+  {
+    "Field": "created_at",
+    "Type": "timestamp",
+    "Null": "YES"
+  },
+  {
+    "Field": "is_daily",
+    "Type": "tinyint(1)",
+    "Null": "YES"
+  }
+]
+--- SCHEMA FOR submissions ---
+[
+  {
+    "Field": "id",
+    "Type": "int",
+    "Null": "NO"
+  },
+  {
+    "Field": "user_id",
+    "Type": "int",
+    "Null": "NO"
+  },
+  {
+    "Field": "problem_id",
+    "Type": "int",
+    "Null": "NO"
+  },
+  {
+    "Field": "language",
+    "Type": "varchar(50)",
+    "Null": "NO"
+  },
+  {
+    "Field": "code",
+    "Type": "text",
+    "Null": "NO"
+  },
+  {
+    "Field": "status",
+    "Type": "varchar(50)",
+    "Null": "NO"
+  },
+  {
+    "Field": "runtime",
+    "Type": "float",
+    "Null": "YES"
+  },
+  {
+    "Field": "memory",
+    "Type": "float",
+    "Null": "YES"
+  },
+  {
+    "Field": "submitted_at",
+    "Type": "timestamp",
+    "Null": "YES"
+  },
+  {
+    "Field": "contest_id",
+    "Type": "int",
+    "Null": "YES"
+  }
+]
+--- SCHEMA FOR test_cases ---
+[
+  {
+    "Field": "id",
+    "Type": "int",
+    "Null": "NO"
+  },
+  {
+    "Field": "problem_id",
+    "Type": "int",
+    "Null": "NO"
+  },
+  {
+    "Field": "input",
+    "Type": "text",
+    "Null": "NO"
+  },
+  {
+    "Field": "expected_output",
+    "Type": "text",
+    "Null": "NO"
+  },
+  {
+    "Field": "is_hidden",
+    "Type": "tinyint(1)",
+    "Null": "YES"
+  }
+]
+--- SCHEMA FOR users ---
+[
+  {
+    "Field": "id",
+    "Type": "int",
+    "Null": "NO"
+  },
+  {
+    "Field": "name",
+    "Type": "varchar(100)",
+    "Null": "NO"
+  },
+  {
+    "Field": "email",
+    "Type": "varchar(100)",
+    "Null": "NO"
+  },
+  {
+    "Field": "password",
+    "Type": "varchar(255)",
+    "Null": "YES"
+  },
+  {
+    "Field": "role",
+    "Type": "enum('Admin','User')",
+    "Null": "YES"
+  },
+  {
+    "Field": "created_at",
+    "Type": "timestamp",
+    "Null": "YES"
+  },
+  {
+    "Field": "profile_image_url",
+    "Type": "varchar(500)",
+    "Null": "YES"
+  },
+  {
+    "Field": "is_blocked",
+    "Type": "tinyint(1)",
+    "Null": "YES"
+  }
+]

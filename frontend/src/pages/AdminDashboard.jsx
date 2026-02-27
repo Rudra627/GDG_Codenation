@@ -267,6 +267,36 @@ const AdminDashboard = () => {
         }
     };
 
+    const handleDeleteUser = async (id) => {
+        if (!window.confirm('Are you sure you want to delete this user account? This action cannot be undone.')) return;
+        setMessage('');
+        const token = localStorage.getItem('token');
+        try {
+            await axios.delete(`${import.meta.env.VITE_API_URL}/api/users/${id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setMessage('User deleted successfully!');
+            fetchData();
+        } catch (error) {
+            setMessage(error.response?.data?.message || 'Error deleting user');
+        }
+    };
+
+    const handleBlockUser = async (id, currentStatus) => {
+        if (!window.confirm(`Are you sure you want to ${currentStatus ? 'unblock' : 'block'} this user?`)) return;
+        setMessage('');
+        const token = localStorage.getItem('token');
+        try {
+            await axios.put(`${import.meta.env.VITE_API_URL}/api/users/${id}/block`, { is_blocked: !currentStatus }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setMessage(`User ${currentStatus ? 'unblocked' : 'blocked'} successfully!`);
+            fetchData();
+        } catch (error) {
+            setMessage(error.response?.data?.message || 'Error updating user block status');
+        }
+    };
+
     const handleReminderTypeChange = (e) => {
         const type = e.target.value;
         let defaultSubject = '';
@@ -656,7 +686,9 @@ const AdminDashboard = () => {
                                     <th className="px-6 py-4">Name</th>
                                     <th className="px-6 py-4">Email</th>
                                     <th className="px-6 py-4">Role</th>
+                                    <th className="px-6 py-4">Status</th>
                                     <th className="px-6 py-4">Joined At</th>
+                                    <th className="px-6 py-4">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-700/50 text-gray-300 font-medium">
@@ -692,7 +724,34 @@ const AdminDashboard = () => {
                                                     {u.role}
                                                 </span>
                                             </td>
+                                            <td className="px-6 py-4 text-center">
+                                                {u.is_blocked ? (
+                                                    <span className="px-2 py-1 rounded text-xs uppercase tracking-wider bg-red-900/50 text-red-400 border border-red-500/30">Blocked</span>
+                                                ) : (
+                                                    <span className="px-2 py-1 rounded text-xs uppercase tracking-wider bg-green-900/50 text-green-400 border border-green-500/30">Active</span>
+                                                )}
+                                            </td>
                                             <td className="px-6 py-4 text-gray-500 text-sm">{new Date(u.created_at).toLocaleDateString()}</td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex space-x-2">
+                                                    {u.role !== 'Admin' && (
+                                                        <>
+                                                            <button 
+                                                                onClick={() => handleBlockUser(u.id, u.is_blocked)}
+                                                                className={`text-sm px-3 py-1.5 rounded smooth-transition ${u.is_blocked ? 'bg-yellow-600/20 text-yellow-500 hover:bg-yellow-600/40 border border-yellow-500/30' : 'bg-orange-600/20 text-orange-500 hover:bg-orange-600/40 border border-orange-500/30'}`}
+                                                            >
+                                                                {u.is_blocked ? 'Unblock' : 'Block'}
+                                                            </button>
+                                                            <button 
+                                                                onClick={() => handleDeleteUser(u.id)}
+                                                                className="text-red-400 hover:text-red-500 text-sm border border-red-500/30 px-3 py-1.5 rounded smooth-transition bg-red-600/10 hover:bg-red-600/30"
+                                                            >
+                                                                Delete
+                                                            </button>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </td>
                                         </tr>
                                     ))
                                 )}

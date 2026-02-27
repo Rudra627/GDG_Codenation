@@ -56,6 +56,11 @@ exports.login = async (req, res) => {
 
         const user = users[0];
 
+        // Check if user is blocked
+        if (user.is_blocked) {
+            return res.status(403).json({ message: 'Your account has been blocked by an administrator.' });
+        }
+
         // Validate password
         const isMatch = user.password ? await bcrypt.compare(password, user.password) : false;
         if (!isMatch) {
@@ -198,6 +203,12 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
             }
         } else {
             user = users[0];
+            
+            // Check if user is blocked
+            if (user.is_blocked) {
+                return res.status(403).json({ message: 'Your account has been blocked by an administrator.' });
+            }
+
             // Optionally, update their profile picture if they login with Google again and it's missing/changed
             if (picture && user.profile_image_url !== picture) {
                  await pool.query(
