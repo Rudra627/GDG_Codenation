@@ -3,6 +3,7 @@ const pool = require('./config/db');
 
 const newAdmins = [
     { name: 'Admin2', email: 'pratyushnanda77@gmail.com', password: 'pratyush@codenation', role: 'Admin' },
+    { name: 'ayushmantripathy', email: '23cse417.ayushmantripathy@giet.edu', password: 'ayushmantripathy@codenation', role: 'Admin' },
    
 ];
 
