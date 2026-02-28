@@ -116,6 +116,21 @@ exports.getTestCases = async (req, res) => {
     }
 };
 
+// @desc    Get only visible (non-hidden) sample test cases (User)
+exports.getSampleTestCases = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const [testCases] = await pool.query(
+            'SELECT id, input, expected_output FROM test_cases WHERE problem_id = ? AND is_hidden = 0',
+            [id]
+        );
+        res.status(200).json(testCases);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+};
+
 // @desc    Set a problem as Daily Challenge (Admin)
 exports.setDailyChallenge = async (req, res) => {
     try {

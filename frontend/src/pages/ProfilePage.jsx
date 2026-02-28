@@ -61,20 +61,32 @@ const ProfilePage = () => {
                 // Calculate Current Streak (Consecutive days with at least one submission)
                 let currentStreak = 0;
                 if (subs.length > 0) {
-                    const today = new Date().setHours(0,0,0,0);
-                    let checkDate = today;
-                    
-                    // Filter unique days of submission
-                    const subDays = [...new Set(subs.map(s => new Date(s.submitted_at).setHours(0,0,0,0)))];
-                    subDays.sort((a,b) => b - a); // Descending
+                    // Helper: local YYYY-MM-DD string
+                    const toStr = (d) => {
+                        const yr = d.getFullYear();
+                        const mo = String(d.getMonth() + 1).padStart(2, '0');
+                        const dy = String(d.getDate()).padStart(2, '0');
+                        return `${yr}-${mo}-${dy}`;
+                    };
 
-                    if (subDays[0] === today || subDays[0] === today - 86400000) {
+                    const todayStr = toStr(new Date());
+                    const yesterdayDate = new Date(); yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+                    const yesterdayStr = toStr(yesterdayDate);
+
+                    // Get unique local submission days, sorted descending
+                    const subDaySet = [...new Set(subs.map(s => toStr(new Date(s.submitted_at))))];
+                    subDaySet.sort((a, b) => b.localeCompare(a));
+
+                    if (subDaySet[0] === todayStr || subDaySet[0] === yesterdayStr) {
                         currentStreak = 1;
-                        checkDate = subDays[0];
-                        for (let i = 1; i < subDays.length; i++) {
-                            if (subDays[i] === checkDate - 86400000) {
+                        let prevStr = subDaySet[0];
+                        for (let i = 1; i < subDaySet.length; i++) {
+                            const expectedDate = new Date(prevStr);
+                            expectedDate.setDate(expectedDate.getDate() - 1);
+                            const expectedStr = toStr(expectedDate);
+                            if (subDaySet[i] === expectedStr) {
                                 currentStreak++;
-                                checkDate -= 86400000;
+                                prevStr = subDaySet[i];
                             } else {
                                 break;
                             }
@@ -152,16 +164,25 @@ const ProfilePage = () => {
         </div>
     );
 
-    // Generate Github-like Activity Grid data (last 30 days for simplicity)
+    // Generate Github-like Activity Grid data (last ~1 year)
     const generateActivityGrid = () => {
         const grid = [];
-        const today = new Date().setHours(0,0,0,0);
-        
-        // Count submissions per day
+
+        // Helper: get local YYYY-MM-DD string for any Date
+        const toLocalDateStr = (d) => {
+            const yr  = d.getFullYear();
+            const mo  = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${yr}-${mo}-${day}`;
+        };
+
+        const todayStr = toLocalDateStr(new Date());
+
+        // Count submissions per local date string
         const subCounts = {};
         stats.submissions.forEach(s => {
-            const day = new Date(s.submitted_at).setHours(0,0,0,0);
-            subCounts[day] = (subCounts[day] || 0) + 1;
+            const key = toLocalDateStr(new Date(s.submitted_at));
+            subCounts[key] = (subCounts[key] || 0) + 1;
         });
 
         // Generate 52 columns x 7 rows (approx last ~1 year)
@@ -169,19 +190,21 @@ const ProfilePage = () => {
             const colDays = [];
             for (let row = 0; row < 7; row++) {
                 const dayOffset = ((51 - col) * 7) + (6 - row);
-                const targetDay = today - (dayOffset * 86400000);
-                const count = subCounts[targetDay] || 0;
-                
+                const targetDate = new Date();
+                targetDate.setDate(targetDate.getDate() - dayOffset);
+                const dayKey = toLocalDateStr(targetDate);
+                const count = subCounts[dayKey] || 0;
+
                 let intensityClass = "bg-gray-900"; // No activity
                 if (count > 0 && count <= 2) intensityClass = "bg-[#07fc03]/30";
                 if (count > 2 && count <= 4) intensityClass = "bg-[#07fc03]/60";
                 if (count > 4) intensityClass = "bg-[#07fc03]";
 
                 colDays.push(
-                    <div 
-                        key={`${col}-${row}`} 
+                    <div
+                        key={`${col}-${row}`}
                         className={`w-3 h-3 rounded-sm ${intensityClass} border border-[#07fc03]/10`}
-                        title={`${count} submissions on ${new Date(targetDay).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' })}`}
+                        title={`${count} submission${count !== 1 ? 's' : ''} on ${dayKey}`}
                     ></div>
                 );
             }

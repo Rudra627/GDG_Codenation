@@ -7,6 +7,7 @@ const {
     deleteProblem,
     addTestCase,
     getTestCases,
+    getSampleTestCases,
     setDailyChallenge,
     getProblemsWithUserStatus
 } = require('../controllers/problemController');
@@ -17,6 +18,7 @@ const router = express.Router();
 router.get('/', getProblems);
 router.get('/user-status', protect, getProblemsWithUserStatus);
 router.get('/:id', getProblemById);
+router.get('/:id/samples', protect, getSampleTestCases);
 
 // Admin Routes (Protect + AdminOnly)
 router.post('/', protect, adminOnly, createProblem);

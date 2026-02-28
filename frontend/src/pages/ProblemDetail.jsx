@@ -21,7 +21,7 @@ const LANGUAGES = [
 const TEMPLATES = {
     python: `import sys\ninput = sys.stdin.readline\n\n# Write your solution here\n`,
     javascript: `const lines = require('fs').readFileSync(0,'utf8').trim().split('\\n');\nlet idx=0; const rl=()=>lines[idx++];\n\n// Write your solution here\n`,
-    java: `import java.util.*;\nimport java.io.*;\n\npublic class Main {\n    public static void main(String[] args) throws IOException {\n        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));\n        // Your code here\n    }\n}`,
+    java: `import java.util.*;\nimport java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        // Your code here\n    }\n}`,
     c: `#include <stdio.h>\n\nint main() {\n    // Your code here\n    return 0;\n}`,
     'c++': `#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    ios_base::sync_with_stdio(false);\n    cin.tie(NULL);\n    // Your code here\n    return 0;\n}`,
 };
@@ -165,6 +165,7 @@ const ProblemDetail = () => {
     const contestId = new URLSearchParams(useLocation().search).get('contestId');
 
     const [problem, setProblem]     = useState(null);
+    const [sampleCases, setSampleCases] = useState([]);
     const [loading, setLoading]     = useState(true);
     const [language, setLanguage]   = useState('python');
     const [code, setCode]           = useState(TEMPLATES.python);
@@ -186,8 +187,17 @@ const ProblemDetail = () => {
     const [activeResult, setActiveResult] = useState(null);
 
     useEffect(() => {
-        axios.get(`${import.meta.env.VITE_API_URL}/api/problems/${id}`)
-            .then(r => setProblem(r.data))
+        setLoading(true);
+        const token = localStorage.getItem('token');
+        const headers = { Authorization: `Bearer ${token}` };
+        Promise.all([
+            axios.get(`${import.meta.env.VITE_API_URL}/api/problems/${id}`),
+            axios.get(`${import.meta.env.VITE_API_URL}/api/problems/${id}/samples`, { headers })
+        ])
+            .then(([probRes, samplesRes]) => {
+                setProblem(probRes.data);
+                setSampleCases(samplesRes.data || []);
+            })
             .catch(console.error)
             .finally(() => setLoading(false));
     }, [id]);
@@ -290,21 +300,59 @@ const ProblemDetail = () => {
                 </div>
 
                 {/* Topics */}
-                {problem.topics?.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 mb-4">
-                        {problem.topics.map(t => (
-                            <span key={t} className="px-2 py-0.5 text-[11px] rounded"
-                                  style={{ background: '#2a2a2a', border: '1px solid #444', color: '#aaa' }}>
-                                {t}
-                            </span>
+                {(() => {
+                    const topicsArr = problem.topics
+                        ? (Array.isArray(problem.topics)
+                            ? problem.topics
+                            : problem.topics.split(',').map(t => t.trim()).filter(Boolean))
+                        : [];
+                    return topicsArr.length > 0 ? (
+                        <div className="flex flex-wrap gap-1.5 mb-4">
+                            {topicsArr.map(t => (
+                                <span key={t} className="px-2 py-0.5 text-[11px] rounded"
+                                      style={{ background: '#2a2a2a', border: '1px solid #444', color: '#aaa' }}>
+                                    {t}
+                                </span>
+                            ))}
+                        </div>
+                    ) : null;
+                })()}
+
+                {/* Body */}
+                <div className="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap mb-5">
+                    {problem.description}
+                </div>
+
+                {/* Sample Test Cases */}
+                {sampleCases.length > 0 && (
+                    <div className="space-y-4">
+                        {sampleCases.map((tc, idx) => (
+                            <div key={tc.id}
+                                 style={{ background: '#212121', border: '1px solid #333', borderRadius: '8px', overflow: 'hidden' }}>
+                                <div className="px-3 py-1.5 text-xs font-bold"
+                                     style={{ background: '#2a2a2a', borderBottom: '1px solid #333', color: '#aaa', letterSpacing: '0.05em' }}>
+                                    Example {idx + 1}
+                                </div>
+                                <div className="p-3 space-y-2">
+                                    <div>
+                                        <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Input</span>
+                                        <pre className="mt-1 text-xs rounded px-3 py-2 whitespace-pre-wrap font-mono leading-relaxed"
+                                             style={{ background: '#0d1117', border: '1px solid #1d3a5f', color: '#93c5fd' }}>
+                                            {tc.input || '(none)'}
+                                        </pre>
+                                    </div>
+                                    <div>
+                                        <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Output</span>
+                                        <pre className="mt-1 text-xs rounded px-3 py-2 whitespace-pre-wrap font-mono leading-relaxed"
+                                             style={{ background: '#001a00', border: '1px solid #166534', color: '#86efac' }}>
+                                            {tc.expected_output || '(none)'}
+                                        </pre>
+                                    </div>
+                                </div>
+                            </div>
                         ))}
                     </div>
                 )}
-
-                {/* Body */}
-                <div className="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">
-                    {problem.description}
-                </div>
             </div>
         </div>
     );

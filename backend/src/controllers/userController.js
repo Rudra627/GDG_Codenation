@@ -159,9 +159,10 @@ exports.getUserPublicProfile = async (req, res) => {
 
         // Fetch user's submissions
         const [submissions] = await pool.query(`
-            SELECT s.id, s.problem_id, p.title as problem_title, s.language, s.status, s.runtime, s.submitted_at 
+            SELECT s.id, s.problem_id, COALESCE(p.title, 'Practice') as problem_title,
+                   s.language, s.status, s.runtime, s.submitted_at 
             FROM submissions s
-            JOIN problems p ON s.problem_id = p.id
+            LEFT JOIN problems p ON s.problem_id = p.id
             WHERE s.user_id = ? 
             ORDER BY s.submitted_at DESC
         `, [id]);
