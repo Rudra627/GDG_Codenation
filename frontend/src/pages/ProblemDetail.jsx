@@ -190,15 +190,25 @@ const ProblemDetail = () => {
         setLoading(true);
         const token = localStorage.getItem('token');
         const headers = { Authorization: `Bearer ${token}` };
-        Promise.all([
-            axios.get(`${import.meta.env.VITE_API_URL}/api/problems/${id}`),
-            axios.get(`${import.meta.env.VITE_API_URL}/api/problems/${id}/samples`, { headers })
-        ])
-            .then(([probRes, samplesRes]) => {
+
+        // Fetch problem first (public route), then samples independently
+        axios.get(`${import.meta.env.VITE_API_URL}/api/problems/${id}`)
+            .then((probRes) => {
                 setProblem(probRes.data);
-                setSampleCases(samplesRes.data || []);
+                // Fetch samples separately — failure here won't hide the problem
+                return axios.get(
+                    `${import.meta.env.VITE_API_URL}/api/problems/${id}/samples`,
+                    { headers }
+                ).then((samplesRes) => {
+                    setSampleCases(samplesRes.data || []);
+                }).catch(() => {
+                    setSampleCases([]); // samples failed, just show no examples
+                });
             })
-            .catch(console.error)
+            .catch((err) => {
+                console.error('Failed to load problem:', err);
+                setProblem(null);
+            })
             .finally(() => setLoading(false));
     }, [id]);
 
