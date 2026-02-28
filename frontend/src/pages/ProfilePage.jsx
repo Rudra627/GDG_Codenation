@@ -49,8 +49,8 @@ const ProfilePage = () => {
                     subs = res.data;
                 }
                 
-                // Calculate Total Solved (Unique problems with 'Accepted' or 'Pending' status)
-                const acceptedSubs = subs.filter(s => s.status === 'Accepted' || s.status === 'Pending');
+                // Calculate Total Solved (Unique problems with 'Accepted' status only)
+                const acceptedSubs = subs.filter(s => s.status === 'Accepted');
                 const uniqueSolvedIds = new Set(acceptedSubs.map(s => s.problem_id));
                 const totalSolved = uniqueSolvedIds.size;
 

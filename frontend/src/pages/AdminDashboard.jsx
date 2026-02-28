@@ -730,7 +730,7 @@ const AdminDashboard = () => {
                             <tbody className="divide-y divide-gray-700/50 text-gray-300 font-medium">
                                 {users.length === 0 ? (
                                     <tr>
-                                        <td colSpan="6" className="px-6 py-8 text-center text-gray-500">No users found</td>
+                                        <td colSpan="8" className="px-6 py-8 text-center text-gray-500">No users found</td>
                                     </tr>
                                 ) : (
                                     users.map(u => (

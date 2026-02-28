@@ -1,9 +1,10 @@
 const express = require('express');
-const { submitCode, getUserSubmissions, getAllSubmissions, updateSubmissionStatus, deleteAllSubmissions } = require('../controllers/submissionController');
+const { submitCode, getUserSubmissions, getAllSubmissions, updateSubmissionStatus, deleteAllSubmissions, runCode } = require('../controllers/submissionController');
 const { protect, adminOnly } = require('../middleware/authMiddleware');
 const router = express.Router();
 
 // User Routes
+router.post('/run', protect, runCode);
 router.post('/', protect, submitCode);
 router.get('/history', protect, getUserSubmissions);
 
