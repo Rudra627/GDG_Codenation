@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 
 const AdminDashboard = () => {
-    const [activeTab, setActiveTab] = useState('problems'); // 'problems', 'submissions', 'notes'
+    const [activeTab, setActiveTab] = useState('problems'); // 'problems', 'submissions', 'notes', 'templates'
     const [problems, setProblems] = useState([]);
     const [submissions, setSubmissions] = useState([]);
     const [notes, setNotes] = useState([]);
@@ -27,6 +27,15 @@ const AdminDashboard = () => {
     const [isEditingNote, setIsEditingNote] = useState(false);
     const [editNoteId, setEditNoteId] = useState(null);
 
+    // Template state
+    const TEMPLATE_LANGUAGES = ['python', 'javascript', 'java', 'c', 'c++'];
+    const [templateProblemId, setTemplateProblemId] = useState('');
+    const [templateLang, setTemplateLang] = useState('python');
+    const [templateStarterCode, setTemplateStarterCode] = useState('');
+    const [templateDriverCode, setTemplateDriverCode] = useState('');
+    const [existingTemplates, setExistingTemplates] = useState([]);
+    const [templateMsg, setTemplateMsg] = useState('');
+
     useEffect(() => {
         fetchData();
     }, [activeTab]);
@@ -35,7 +44,7 @@ const AdminDashboard = () => {
         const token = localStorage.getItem('token');
         const headers = { Authorization: `Bearer ${token}` };
         try {
-            if (activeTab === 'problems') {
+            if (activeTab === 'problems' || activeTab === 'templates') {
                 const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/problems`, { headers });
                 setProblems(res.data);
             } else if (activeTab === 'submissions') {
@@ -47,7 +56,7 @@ const AdminDashboard = () => {
             } else if (activeTab === 'users') {
                 const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/users`, { headers });
                 setUsers(res.data);
-                setSelectedUserIds([]); // reset selection on fetch
+                setSelectedUserIds([]);
             }
         } catch (error) {
             console.error("Fetch error", error);
@@ -233,6 +242,63 @@ const AdminDashboard = () => {
         }
     };
 
+    // --- Template Handler Methods ---
+    const fetchExistingTemplates = async (probId) => {
+        if (!probId) return;
+        const token = localStorage.getItem('token');
+        try {
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/problems/${probId}/templates`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setExistingTemplates(res.data);
+        } catch { setExistingTemplates([]); }
+    };
+
+    const handleTemplateProblemChange = (probId) => {
+        setTemplateProblemId(probId);
+        setTemplateStarterCode('');
+        setTemplateDriverCode('');
+        setTemplateMsg('');
+        fetchExistingTemplates(probId);
+    };
+
+    const handleLoadTemplateForEdit = (tpl) => {
+        setTemplateLang(tpl.language);
+        setTemplateStarterCode(tpl.starter_code);
+        setTemplateDriverCode(tpl.driver_code);
+        setTemplateMsg('');
+    };
+
+    const handleSaveTemplate = async (e) => {
+        e.preventDefault();
+        setTemplateMsg('');
+        const token = localStorage.getItem('token');
+        try {
+            await axios.post(`${import.meta.env.VITE_API_URL}/api/problems/${templateProblemId}/template`, {
+                language: templateLang,
+                starter_code: templateStarterCode,
+                driver_code: templateDriverCode,
+            }, { headers: { Authorization: `Bearer ${token}` } });
+            setTemplateMsg('✅ Template saved successfully!');
+            fetchExistingTemplates(templateProblemId);
+        } catch (err) {
+            setTemplateMsg('❌ ' + (err.response?.data?.message || 'Error saving template'));
+        }
+    };
+
+    const handleDeleteTemplate = async (probId, lang) => {
+        if (!window.confirm(`Delete the ${lang} template for this problem?`)) return;
+        const token = localStorage.getItem('token');
+        try {
+            await axios.delete(`${import.meta.env.VITE_API_URL}/api/problems/${probId}/template/${lang}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setTemplateMsg('🗑️ Template deleted.');
+            fetchExistingTemplates(probId);
+            if (templateLang === lang) { setTemplateStarterCode(''); setTemplateDriverCode(''); }
+        } catch { setTemplateMsg('❌ Error deleting template'); }
+    };
+
     const handleUpdateSubmissionStatus = async (id, status) => {
         setStatusUpdating(true);
         setMessage('');
@@ -400,6 +466,12 @@ const AdminDashboard = () => {
                     className={`px-4 py-2 rounded-lg font-semibold smooth-transition ${activeTab === 'users' ? 'bg-[#07fc03] text-black' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
                 >
                     Manage Users
+                </button>
+                <button 
+                    onClick={() => { setActiveTab('templates'); fetchData(); }}
+                    className={`px-4 py-2 rounded-lg font-semibold smooth-transition ${activeTab === 'templates' ? 'bg-[#07fc03] text-black' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
+                >
+                    Code Templates
                 </button>
             </div>
 
@@ -795,6 +867,87 @@ const AdminDashboard = () => {
                                 )}
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            )}
+
+            {/* ── Code Templates Tab ──────────────────────────────────────── */}
+            {activeTab === 'templates' && (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {/* Left: Form */}
+                    <div className="glass p-6 rounded-xl">
+                        <h2 className="text-xl font-bold mb-1 text-gray-100">Code Templates</h2>
+                        <p className="text-xs text-gray-500 mb-4">Set per-problem, per-language starter code and hidden driver code. Users only see the starter; the driver wraps it at execution time.</p>
+
+                        <form onSubmit={handleSaveTemplate} className="space-y-4">
+                            <div>
+                                <label className="block text-sm text-gray-400 mb-1">Problem</label>
+                                <select required className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white"
+                                    value={templateProblemId} onChange={e => handleTemplateProblemChange(e.target.value)}>
+                                    <option value="">-- Select Problem --</option>
+                                    {problems.map(p => <option key={p.id} value={p.id}>{p.id} - {p.title}</option>)}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm text-gray-400 mb-1">Language</label>
+                                <select className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white"
+                                    value={templateLang} onChange={e => setTemplateLang(e.target.value)}>
+                                    {TEMPLATE_LANGUAGES.map(l => <option key={l} value={l}>{l}</option>)}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm text-gray-400 mb-1">Starter Code <span className="text-[#07fc03] text-xs">(what users see in editor)</span></label>
+                                <textarea required rows="6" className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white font-mono text-sm focus:border-[#07fc03] focus:outline-none custom-scrollbar"
+                                    placeholder="def twoSum(nums, target):\n    # Write your solution here\n    pass"
+                                    value={templateStarterCode} onChange={e => setTemplateStarterCode(e.target.value)} />
+                            </div>
+                            <div>
+                                <label className="block text-sm text-gray-400 mb-1">Driver Code <span className="text-yellow-400 text-xs">(hidden wrapper — must contain &#123;&#123;USER_CODE&#125;&#125;)</span></label>
+                                <textarea required rows="10" className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white font-mono text-sm focus:border-[#07fc03] focus:outline-none custom-scrollbar"
+                                    placeholder={`import sys\ninput = sys.stdin.readline\n\n{{USER_CODE}}\n\nnums = list(map(int, input().split()))\ntarget = int(input())\nprint(*twoSum(nums, target))`}
+                                    value={templateDriverCode} onChange={e => setTemplateDriverCode(e.target.value)} />
+                                <p className="text-xs text-gray-600 mt-1">Place <code className="text-yellow-400">{'{{USER_CODE}}'}</code> where the user's function will be injected.</p>
+                            </div>
+                            {templateMsg && <p className={`text-sm ${templateMsg.startsWith('✅') ? 'text-green-400' : 'text-red-400'}`}>{templateMsg}</p>}
+                            <button type="submit" className="bg-[#07fc03] hover:bg-[#07fc03]/80 text-black px-4 py-2 rounded font-bold smooth-transition">
+                                Save Template
+                            </button>
+                        </form>
+                    </div>
+
+                    {/* Right: Existing templates for selected problem */}
+                    <div className="glass p-6 rounded-xl">
+                        <h2 className="text-xl font-bold mb-4 text-gray-100">Existing Templates</h2>
+                        {!templateProblemId ? (
+                            <p className="text-gray-500 text-sm">Select a problem to see its templates.</p>
+                        ) : existingTemplates.length === 0 ? (
+                            <p className="text-gray-500 text-sm">No templates set for this problem yet.</p>
+                        ) : (
+                            <div className="space-y-3">
+                                {existingTemplates.map(tpl => (
+                                    <div key={tpl.language} className="bg-gray-800/50 border border-gray-700 rounded-lg p-4 flex justify-between items-center">
+                                        <div>
+                                            <span className="font-bold text-[#07fc03] uppercase tracking-wider text-sm">{tpl.language}</span>
+                                            <p className="text-xs text-gray-500 mt-1 font-mono truncate max-w-[220px]">{tpl.starter_code.split('\n')[0]}</p>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <button onClick={() => handleLoadTemplateForEdit(tpl)}
+                                                className="text-blue-400 text-xs border border-blue-500/30 px-3 py-1.5 rounded hover:bg-blue-500/10 smooth-transition">Edit</button>
+                                            <button onClick={() => handleDeleteTemplate(templateProblemId, tpl.language)}
+                                                className="text-red-400 text-xs border border-red-500/30 px-3 py-1.5 rounded hover:bg-red-500/10 smooth-transition">Delete</button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        <div className="mt-8 p-4 bg-[#07fc03]/5 border border-[#07fc03]/20 rounded-lg">
+                            <h3 className="text-xs font-bold text-[#07fc03] uppercase tracking-wider mb-2">Example: Two Sum (Python)</h3>
+                            <p className="text-xs text-gray-500 mb-2 font-bold">Starter Code:</p>
+                            <pre className="text-xs text-gray-300 font-mono bg-black/30 p-2 rounded mb-3 overflow-x-auto">{`def twoSum(nums, target):\n    # Write your solution here\n    pass`}</pre>
+                            <p className="text-xs text-gray-500 mb-2 font-bold">Driver Code:</p>
+                            <pre className="text-xs text-gray-300 font-mono bg-black/30 p-2 rounded overflow-x-auto">{`import sys\ninput = sys.stdin.readline\n\n{{USER_CODE}}\n\nnums = list(map(int, input().split()))\ntarget = int(input())\nprint(*twoSum(nums, target))`}</pre>
+                        </div>
                     </div>
                 </div>
             )}

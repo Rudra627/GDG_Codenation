@@ -169,6 +169,7 @@ const ProblemDetail = () => {
     const [loading, setLoading]     = useState(true);
     const [language, setLanguage]   = useState('python');
     const [code, setCode]           = useState(TEMPLATES.python);
+    const [hasTemplate, setHasTemplate] = useState(false); // true if problem has a function template
     const [mobileTab, setMobileTab] = useState('description');
     const [bottomTab, setBottomTab] = useState('result');
     const [fullscreen, setFullscreen] = useState(false);
@@ -211,9 +212,24 @@ const ProblemDetail = () => {
             .finally(() => setLoading(false));
     }, [id]);
 
+    // Fetch starter code when problem loads or language changes
+    useEffect(() => {
+        if (!id) return;
+        axios.get(`${import.meta.env.VITE_API_URL}/api/problems/${id}/template/${language}`)
+            .then((res) => {
+                setCode(res.data.starter_code);
+                setHasTemplate(true);
+            })
+            .catch(() => {
+                // No template for this lang — fall back to generic stdin template
+                setCode(TEMPLATES[language] || '');
+                setHasTemplate(false);
+            });
+    }, [id, language]);
+
     const changeLang = (lang) => {
         setLanguage(lang);
-        setCode(TEMPLATES[lang] || '');
+        // Code will be set by the template useEffect above (triggered by language change)
         setRunResult(null);
         setSubmitResult(null);
         setActiveResult(null);
@@ -381,8 +397,15 @@ const ProblemDetail = () => {
                         className="text-xs px-2 py-1 rounded outline-none cursor-pointer disabled:opacity-40"
                         style={{ background: '#3c3c3c', color: '#ddd', border: '1px solid #555' }}
                     >
-                        {LANGUAGES.map(l => <option key={l.id} value={l.id}>{l.label}</option>)}
+                    {LANGUAGES.map(l => <option key={l.id} value={l.id}>{l.label}</option>)}
                     </select>
+                    {/* Template mode badge */}
+                    {hasTemplate && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider"
+                              style={{ background: '#07fc0320', color: '#07fc03', border: '1px solid #07fc0340' }}>
+                            ƒ Function Mode
+                        </span>
+                    )}
                 </div>
 
                 {/* Problem title shown inline in fullscreen — no overlap */}
@@ -393,8 +416,15 @@ const ProblemDetail = () => {
                     </span>
                 )}
                 <div className="flex items-center gap-1.5">
-                    <button onClick={() => changeLang(language)} disabled={isBusy} title="Reset to template"
-                            className="p-1.5 rounded disabled:opacity-40 text-gray-500 hover:text-gray-300 transition-colors">
+                    <button
+                        onClick={() => {
+                            // Re-fetch template (or fall back to generic) on reset
+                            axios.get(`${import.meta.env.VITE_API_URL}/api/problems/${id}/template/${language}`)
+                                .then(res => setCode(res.data.starter_code))
+                                .catch(() => setCode(TEMPLATES[language] || ''));
+                        }}
+                        disabled={isBusy} title="Reset to starter code"
+                        className="p-1.5 rounded disabled:opacity-40 text-gray-500 hover:text-gray-300 transition-colors">
                         <RotateCcw size={13} />
                     </button>
                     {/* Fullscreen toggle — desktop only */}

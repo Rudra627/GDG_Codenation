@@ -1,6 +1,22 @@
 const pool = require('../config/db');
 const { executeCode } = require('../services/codeExecutionService');
 
+// Helper: Get driver_code for a problem+language (returns null if not found)
+const getDriverCode = async (problemId, language) => {
+    const [rows] = await pool.query(
+        'SELECT driver_code FROM problem_templates WHERE problem_id = ? AND language = ?',
+        [problemId, language.toLowerCase()]
+    );
+    return rows.length > 0 ? rows[0].driver_code : null;
+};
+
+// Helper: Build the final code to execute
+// If a driver exists, inject user code into it; else use user code directly (stdin mode)
+const buildFinalCode = (driverCode, userCode) => {
+    if (!driverCode) return userCode;
+    return driverCode.replace('{{USER_CODE}}', userCode);
+};
+
 // @desc    Run code against sample test cases (no submission saved)
 exports.runCode = async (req, res) => {
     try {
@@ -20,17 +36,20 @@ exports.runCode = async (req, res) => {
             return res.status(400).json({ message: 'No sample test cases found for this problem.' });
         }
 
-        const result = await executeCode(language, problemId, code, testCases);
+        const driverCode  = await getDriverCode(problemId, language);
+        const finalCode   = buildFinalCode(driverCode, code);
+
+        const result = await executeCode(language, problemId, finalCode, testCases);
 
         res.status(200).json({
-            status: result.status,
-            passed: result.passed,
-            total: result.total,
-            runtime: result.runtime || 0,
-            compileError: result.compileError || null,
-            runtimeError: result.runtimeError || null,
-            actualOutput: result.actualOutput || null,
-            expectedOutput: result.expectedOutput || null,
+            status:             result.status,
+            passed:             result.passed,
+            total:              result.total,
+            runtime:            result.runtime || 0,
+            compileError:       result.compileError || null,
+            runtimeError:       result.runtimeError || null,
+            actualOutput:       result.actualOutput || null,
+            expectedOutput:     result.expectedOutput || null,
             failedTestCaseInput: result.failedTestCase ? result.failedTestCase.input : null,
         });
 
@@ -59,16 +78,19 @@ exports.submitCode = async (req, res) => {
             [problemId]
         );
 
+        const driverCode = await getDriverCode(problemId, language);
+        const finalCode  = buildFinalCode(driverCode, code);
+
         // Execute code
         let execResult = { status: 'Pending', runtime: 0 };
         if (testCases.length > 0) {
-            execResult = await executeCode(language, problemId, code, testCases);
+            execResult = await executeCode(language, problemId, finalCode, testCases);
         }
 
-        const status = execResult.status;
+        const status  = execResult.status;
         const runtime = execResult.runtime || 0;
 
-        // Save submission to DB
+        // Save submission to DB (store user's code, NOT the wrapped code)
         const [insertResult] = await pool.query(
             'INSERT INTO submissions (user_id, problem_id, language, code, status, runtime, contest_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
             [userId, problemId, language, code, status, runtime, contestId || null]
@@ -103,15 +125,15 @@ exports.submitCode = async (req, res) => {
         }
 
         res.status(201).json({
-            message: 'Code submitted successfully',
-            submissionId: insertResult.insertId,
+            message:        'Code submitted successfully',
+            submissionId:   insertResult.insertId,
             status,
             runtime,
-            passed: execResult.passed,
-            total: execResult.total,
-            compileError: execResult.compileError || null,
-            runtimeError: execResult.runtimeError || null,
-            actualOutput: execResult.actualOutput || null,
+            passed:         execResult.passed,
+            total:          execResult.total,
+            compileError:   execResult.compileError || null,
+            runtimeError:   execResult.runtimeError || null,
+            actualOutput:   execResult.actualOutput || null,
             expectedOutput: execResult.expectedOutput || null,
         });
 
