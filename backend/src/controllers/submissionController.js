@@ -92,13 +92,14 @@ exports.submitCode = async (req, res) => {
             [problemId]
         );
 
-        // Execute code
-        let execResult = { status: 'Pending', runtime: 0 };
-        if (testCases.length > 0) {
-            const driverCode = await getDriverCode(problemId, language);
-            const finalCode = buildFinalCode(code, driverCode, language);
-            execResult = await executeCode(language, problemId, finalCode, testCases);
+        if (testCases.length === 0) {
+            return res.status(400).json({ message: 'No test cases found for this problem. Please contact the administrator.' });
         }
+
+        // Execute code
+        const driverCode = await getDriverCode(problemId, language);
+        const finalCode = buildFinalCode(code, driverCode, language);
+        const execResult = await executeCode(language, problemId, finalCode, testCases);
 
         const status  = execResult.status;
         const runtime = execResult.runtime || 0;

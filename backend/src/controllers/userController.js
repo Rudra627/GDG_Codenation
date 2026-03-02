@@ -201,7 +201,7 @@ exports.getUserPublicProfile = async (req, res) => {
         // Calculate User's Global Rank
         // Rank = 1 + (Number of users who have solved strictly MORE unique problems than this user)
         const [rankQuery] = await pool.query(`
-            SELECT 1 + COUNT(*) as rank 
+            SELECT 1 + COUNT(*) as global_rank 
             FROM (
                 SELECT user_id, COUNT(DISTINCT problem_id) as solved_count 
                 FROM submissions 
@@ -211,7 +211,7 @@ exports.getUserPublicProfile = async (req, res) => {
             ) as higher_solvers
         `, [solvedProblems.All]);
         
-        const globalRank = rankQuery[0].rank;
+        const globalRank = rankQuery[0].global_rank;
 
         res.status(200).json({ 
             user, 
