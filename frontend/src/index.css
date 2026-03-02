@@ -32,3 +32,25 @@
 .monaco-editor {
   padding-top: 8px;
 }
+
+/* React-Split Gutter Styling */
+.gutter {
+  background-color: #2a2a2a;
+  background-repeat: no-repeat;
+  background-position: 50%;
+  transition: background-color 0.2s ease;
+  position: relative;
+  z-index: 10;
+}
+
+.gutter:hover {
+  background-color: #07fc03;
+}
+
+.gutter.gutter-horizontal {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="30" viewBox="0 0 10 30"><path d="M2.5 5h1v20h-1zm4 0h1v20h-1z" fill="%23666"/></svg>');
+  cursor: col-resize;
+}
+.gutter.gutter-horizontal:hover {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="30" viewBox="0 0 10 30"><path d="M2.5 5h1v20h-1zm4 0h1v20h-1z" fill="%23000"/></svg>');
+}

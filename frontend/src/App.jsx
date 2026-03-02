@@ -13,6 +13,7 @@ import ContestsPage from './pages/ContestsPage';
 import CreateContestPage from './pages/CreateContestPage';
 import EditContestPage from './pages/EditContestPage';
 import ContestDetailPage from './pages/ContestDetailPage';
+import RoadmapPage from './pages/RoadmapPage';
 import Navbar from './components/Navbar';
 import Loader from './components/Loader';
 
@@ -110,6 +111,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <ContestDetailPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/roadmap" 
+              element={
+                <ProtectedRoute>
+                  <RoadmapPage />
                 </ProtectedRoute>
               } 
             />

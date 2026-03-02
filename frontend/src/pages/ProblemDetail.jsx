@@ -1,8 +1,9 @@
-import { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import Editor from '@monaco-editor/react';
+import Split from 'react-split';
 import {
     Play, Send, RotateCcw, FileText, Code2,
     CheckCheck, XCircle, AlertTriangle, Clock, CheckCircle2,
@@ -169,9 +170,12 @@ const ProblemDetail = () => {
     const [loading, setLoading]     = useState(true);
     const [language, setLanguage]   = useState('python');
     const [code, setCode]           = useState(TEMPLATES.python);
-    const [hasTemplate, setHasTemplate] = useState(false); // true if problem has a function template
+    const [hasTemplate, setHasTemplate] = useState(false); // Indicates if this is Function Mode
     const [mobileTab, setMobileTab] = useState('description');
-    const [bottomTab, setBottomTab] = useState('result');
+    const [bottomTab, setBottomTab] = useState('testcase'); // default to testcase
+    const [panelExpanded, setPanelExpanded] = useState(false); // bottom panel toggle
+    const [activeTestCaseTab, setActiveTestCaseTab] = useState(0); // For multiple testcases (-1 means custom)
+    const [customInputVal, setCustomInputVal] = useState('');
     const [fullscreen, setFullscreen] = useState(false);
 
     // ESC key exits fullscreen
@@ -179,7 +183,7 @@ const ProblemDetail = () => {
         const onKey = (e) => { if (e.key === 'Escape') setFullscreen(false); };
         window.addEventListener('keydown', onKey);
         return () => window.removeEventListener('keydown', onKey);
-    }, []); // always show result tab
+    }, []);
 
     const [running, setRunning]         = useState(false);
     const [submitting, setSubmitting]   = useState(false);
@@ -197,13 +201,32 @@ const ProblemDetail = () => {
             .then((probRes) => {
                 setProblem(probRes.data);
                 // Fetch samples separately — public route, no auth needed
-                return axios.get(
-                    `${import.meta.env.VITE_API_URL}/api/problems/${id}/samples`
-                ).then((samplesRes) => {
-                    setSampleCases(samplesRes.data || []);
-                }).catch(() => {
-                    setSampleCases([]); // samples failed, just show no examples
-                });
+                return axios.get(`${import.meta.env.VITE_API_URL}/api/problems/${id}/samples`)
+                    .then((samplesRes) => {
+                        const samples = samplesRes.data || [];
+                        setSampleCases(samples);
+                        setActiveTestCaseTab(samples.length > 0 ? 0 : -1);
+                        
+                        // Fetch starter template
+                        return axios.get(`${import.meta.env.VITE_API_URL}/api/problems/${id}/template/${language}`);
+                    })
+                    .then(tplRes => {
+                        if (tplRes.data?.starter_code) {
+                            setCode(tplRes.data.starter_code);
+                            setHasTemplate(true);
+                        } else {
+                            setCode(TEMPLATES[language] || '');
+                            setHasTemplate(false);
+                        }
+                    })
+                    .catch((err) => {
+                        // If template fetch fails or samples fail
+                        if (err.response?.status !== 404) console.error(err);
+                        setSampleCases(err.response?.status === 404 ? [] : []);
+                        setActiveTestCaseTab(-1);
+                        setCode(TEMPLATES[language] || '');
+                        setHasTemplate(false);
+                    });
             })
             .catch((err) => {
                 console.error('Failed to load problem:', err);
@@ -212,24 +235,28 @@ const ProblemDetail = () => {
             .finally(() => setLoading(false));
     }, [id]);
 
-    // Fetch starter code when problem loads or language changes
+    // Handle template changes when user switches language
     useEffect(() => {
-        if (!id) return;
+        if (!id || loading) return;
         axios.get(`${import.meta.env.VITE_API_URL}/api/problems/${id}/template/${language}`)
-            .then((res) => {
-                setCode(res.data.starter_code);
-                setHasTemplate(true);
+            .then(res => {
+                if (res.data?.starter_code) {
+                    setCode(res.data.starter_code);
+                    setHasTemplate(true);
+                } else {
+                    setCode(TEMPLATES[language] || '');
+                    setHasTemplate(false);
+                }
             })
             .catch(() => {
-                // No template for this lang — fall back to generic stdin template
                 setCode(TEMPLATES[language] || '');
                 setHasTemplate(false);
             });
-    }, [id, language]);
+    }, [language]);
+
 
     const changeLang = (lang) => {
         setLanguage(lang);
-        // Code will be set by the template useEffect above (triggered by language change)
         setRunResult(null);
         setSubmitResult(null);
         setActiveResult(null);
@@ -244,15 +271,22 @@ const ProblemDetail = () => {
         setActiveResult('run');
         setMobileTab('code');
         setBottomTab('result');
+        setPanelExpanded(true);
         try {
+            const payload = { problemId: id, language, code };
+            // If user is on the Custom Input tab, send that input to override samples
+            if (activeTestCaseTab === -1) {
+                payload.customInput = customInputVal;
+            }
             const { data } = await axios.post(
                 `${import.meta.env.VITE_API_URL}/api/submissions/run`,
-                { problemId: id, language, code },
+                payload,
                 { headers: authHeader() }
             );
             setRunResult(data);
         } catch (err) {
-            setRunResult({ status: 'System Error', runtimeError: err.response?.data?.details || err.message, passed: 0, total: 0 });
+            const errDetails = err.response?.data?.message || err.response?.data?.details || err.message;
+            setRunResult({ status: 'System Error', runtimeError: errDetails, passed: 0, total: 0 });
         } finally {
             setRunning(false);
         }
@@ -265,6 +299,7 @@ const ProblemDetail = () => {
         setActiveResult('submit');
         setMobileTab('code');
         setBottomTab('result');
+        setPanelExpanded(true);
         try {
             const payload = { problemId: id, language, code };
             if (contestId) payload.contestId = contestId;
@@ -275,7 +310,8 @@ const ProblemDetail = () => {
             );
             setSubmitResult(data);
         } catch (err) {
-            setSubmitResult({ status: 'System Error', runtimeError: err.response?.data?.details || err.message, passed: 0, total: 0 });
+            const errDetails = err.response?.data?.message || err.response?.data?.details || err.message;
+            setSubmitResult({ status: 'System Error', runtimeError: errDetails, passed: 0, total: 0 });
         } finally {
             setSubmitting(false);
         }
@@ -438,128 +474,208 @@ const ProblemDetail = () => {
                 </div>
             </div>
 
-            {/* Monaco editor fills remaining space */}
-            <div className="flex-1 min-h-0">
-                <Editor
-                    height="100%"
-                    language={langConfig.mono}
-                    theme="vs-dark"
-                    value={code}
-                    onChange={v => setCode(v || '')}
-                    options={{
-                        minimap: { enabled: false },
-                        fontSize: 15,
-                        scrollBeyondLastLine: false,
-                        padding: { top: 12 },
-                        fontFamily: "'JetBrains Mono','Cascadia Code','Fira Code',monospace",
-                        fontLigatures: true,
-                        tabSize: 4,
-                        renderLineHighlight: 'gutter',
-                        bracketPairColorization: { enabled: true },
-                    }}
-                />
-            </div>
-
-            {/* Bottom bar: Run + Submit (like LeetCode) */}
-            <div className="shrink-0 flex items-center justify-between px-4 py-2.5"
-                 style={{ background: '#2d2d2d', borderTop: '1px solid #3a3a3a' }}>
-                {/* Left: verdict dot when result exists */}
-                <div className="flex items-center gap-2">
-                    {v && (
-                        <span className="flex items-center gap-1.5 text-xs font-semibold" style={{ color: v.color }}>
-                            <span className="w-2 h-2 rounded-full inline-block" style={{ background: v.color }} />
-                            {currentResult?.status}
-                        </span>
-                    )}
-                    {!v && !isBusy && (
-                        <span className="text-xs text-gray-600">Ready</span>
-                    )}
-                    {isBusy && (
-                        <span className="flex items-center gap-1.5 text-xs text-gray-400">
-                            <Spinner color="#07fc03" size={12} />
-                            {running ? 'Running...' : 'Submitting...'}
-                        </span>
-                    )}
+            <Split
+                sizes={panelExpanded ? [60, 40] : [100, 0]}
+                minSize={[100, 40]}
+                expandToMin={false}
+                gutterSize={6}
+                gutterAlign="center"
+                snapOffset={30}
+                dragInterval={1}
+                direction="vertical"
+                cursor="row-resize"
+                className="flex flex-col flex-1 overflow-hidden lg:flex-none lg:h-full"
+                style={{ display: 'flex' }}
+            >
+                {/* Monaco editor top half */}
+                <div className="flex-1 min-h-0 flex flex-col">
+                    <Editor
+                        height="100%"
+                        language={langConfig.mono}
+                        theme="vs-dark"
+                        value={code}
+                        onChange={v => setCode(v || '')}
+                        options={{
+                            minimap: { enabled: false },
+                            fontSize: 15,
+                            scrollBeyondLastLine: false,
+                            padding: { top: 12 },
+                            fontFamily: "'JetBrains Mono','Cascadia Code','Fira Code',monospace",
+                            fontLigatures: true,
+                            tabSize: 4,
+                            renderLineHighlight: 'gutter',
+                            bracketPairColorization: { enabled: true },
+                        }}
+                    />
                 </div>
 
-                {/* Right: Run + Submit */}
-                <div className="flex items-center gap-2">
-                    <button
-                        onClick={handleRun}
-                        disabled={isBusy}
-                        className="flex items-center gap-1.5 px-4 py-1.5 rounded text-xs font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                        style={{ background: '#3a3a3a', color: '#ddd', border: '1px solid #555' }}
-                        onMouseEnter={e => { if (!isBusy) e.currentTarget.style.background = '#4a4a4a'; }}
-                        onMouseLeave={e => { e.currentTarget.style.background = '#3a3a3a'; }}
-                    >
-                        {running
-                            ? <Spinner color="#fff" size={12} />
-                            : <Play size={11} fill="#ddd" />
-                        }
-                        <span>Run</span>
-                    </button>
+                {/* Bottom Testcase half */}
+                <div className="flex flex-col overflow-hidden" style={{ minHeight: '40px' }}>
+                    
+                    {/* Bottom bar: Run + Submit (like LeetCode) */}
+                    <div className="shrink-0 flex items-center justify-between px-4 py-2.5"
+                         style={{ background: '#2d2d2d', borderTop: '1px solid #3a3a3a' }}>
+                        {/* Left: verdict dot when result exists */}
+                        <div className="flex items-center gap-2">
+                            {v && (
+                                <span className="flex items-center gap-1.5 text-xs font-semibold" style={{ color: v.color }}>
+                                    <span className="w-2 h-2 rounded-full inline-block" style={{ background: v.color }} />
+                                    {currentResult?.status}
+                                </span>
+                            )}
+                            {!v && !isBusy && (
+                                <span className="text-xs text-gray-600">Ready</span>
+                            )}
+                            {isBusy && (
+                                <span className="flex items-center gap-1.5 text-xs text-gray-400">
+                                    <Spinner color="#07fc03" size={12} />
+                                    {running ? 'Running...' : 'Submitting...'}
+                                </span>
+                            )}
+                        </div>
 
-                    <button
-                        onClick={handleSubmit}
-                        disabled={isBusy}
-                        className="flex items-center gap-1.5 px-4 py-1.5 rounded text-xs font-bold transition-all disabled:cursor-not-allowed"
-                        style={{
-                            background: isBusy ? '#059900' : '#07fc03',
-                            color: '#000',
-                            boxShadow: isBusy ? 'none' : '0 0 12px #07fc0350',
-                        }}
-                    >
-                        {submitting
-                            ? <Spinner color="#003300" size={12} />
-                            : <Send size={11} />
-                        }
-                        <span>Submit</span>
-                    </button>
-                </div>
-            </div>
+                        {/* Right: Run + Submit */}
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={handleRun}
+                                disabled={isBusy}
+                                className="flex items-center gap-1.5 px-4 py-1.5 rounded text-xs font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                                style={{ background: '#3a3a3a', color: '#ddd', border: '1px solid #555' }}
+                                onMouseEnter={e => { if (!isBusy) e.currentTarget.style.background = '#4a4a4a'; }}
+                                onMouseLeave={e => { e.currentTarget.style.background = '#3a3a3a'; }}
+                            >
+                                {running
+                                    ? <Spinner color="#fff" size={12} />
+                                    : <Play size={11} fill="#ddd" />
+                                }
+                                <span>Run</span>
+                            </button>
 
-            {/* Bottom panel: Testcase / Test Result tabs (always visible) */}
-            <div className="shrink-0 flex flex-col" style={{ height: '180px', borderTop: '1px solid #3a3a3a', background: '#1a1a1a' }}>
-                {/* Tab headers */}
-                <div className="flex items-center shrink-0" style={{ borderBottom: '1px solid #333', background: '#222' }}>
-                    <button
-                        onClick={() => setBottomTab('testcase')}
-                        className="px-4 py-2 text-xs font-semibold transition-colors"
-                        style={{
-                            color: bottomTab === 'testcase' ? '#eee' : '#666',
-                            borderBottom: bottomTab === 'testcase' ? '2px solid #07fc03' : '2px solid transparent',
-                        }}
-                    >
-                        Testcase
-                    </button>
-                    <button
-                        onClick={() => setBottomTab('result')}
-                        className="px-4 py-2 text-xs font-semibold transition-colors flex items-center gap-1.5"
-                        style={{
-                            color: bottomTab === 'result' ? '#eee' : '#666',
-                            borderBottom: bottomTab === 'result' ? '2px solid #07fc03' : '2px solid transparent',
-                        }}
-                    >
-                        Test Result
-                        {v && <span className="w-1.5 h-1.5 rounded-full" style={{ background: v.color }} />}
-                    </button>
-                </div>
-
-                {/* Tab body */}
-                {bottomTab === 'testcase' ? (
-                    <div className="flex-1 overflow-y-auto p-3">
-                        <p className="text-xs text-gray-500 mb-2">Custom input (stdin):</p>
-                        <textarea
-                            className="w-full text-xs font-mono rounded p-2 outline-none resize-none"
-                            style={{ background: '#0d1117', border: '1px solid #333', color: '#ccc', height: '80px' }}
-                            placeholder="Enter custom stdin here..."
-                        />
-                        <p className="text-[10px] text-gray-600 mt-1">Note: Custom input runs only in Run mode, not Submit.</p>
+                            <button
+                                onClick={handleSubmit}
+                                disabled={isBusy}
+                                className="flex items-center gap-1.5 px-4 py-1.5 rounded text-xs font-bold transition-all disabled:cursor-not-allowed"
+                                style={{
+                                    background: isBusy ? '#059900' : '#07fc03',
+                                    color: '#000',
+                                    boxShadow: isBusy ? 'none' : '0 0 12px #07fc0350',
+                                }}
+                            >
+                                {submitting
+                                    ? <Spinner color="#003300" size={12} />
+                                    : <Send size={11} />
+                                }
+                                <span>Submit</span>
+                            </button>
+                        </div>
                     </div>
-                ) : (
-                    <TestResultPanel result={currentResult} mode={activeResult} isLoading={isBusy} />
+
+                    {/* Bottom panel tabs + collapse logic */}
+                    <div className="shrink-0 flex flex-col transition-all duration-300 ease-in-out flex-1" style={{ borderTop: '1px solid #3a3a3a', background: '#1a1a1a' }}>
+                        {/* Tab headers */}
+                        <div className="flex items-center justify-between shrink-0 px-2" style={{ borderBottom: '1px solid #333', background: '#222', height: '40px' }}>
+                            <div className="flex items-center h-full">
+                                <button
+                                    onClick={() => { setBottomTab('testcase'); setPanelExpanded(true); }}
+                                    className="px-4 h-full text-xs font-semibold transition-colors flex items-center"
+                                    style={{
+                                        color: (bottomTab === 'testcase' && panelExpanded) ? '#eee' : '#666',
+                                        borderBottom: (bottomTab === 'testcase' && panelExpanded) ? '2px solid #07fc03' : '2px solid transparent',
+                                    }}
+                                >
+                                    Testcase
+                                </button>
+                                <button
+                                    onClick={() => { setBottomTab('result'); setPanelExpanded(true); }}
+                                    className="px-4 h-full text-xs font-semibold transition-colors flex items-center gap-1.5"
+                                    style={{
+                                        color: (bottomTab === 'result' && panelExpanded) ? '#eee' : '#666',
+                                        borderBottom: (bottomTab === 'result' && panelExpanded) ? '2px solid #07fc03' : '2px solid transparent',
+                                    }}
+                                >
+                                    Test Result
+                                    {v && <span className="w-1.5 h-1.5 rounded-full" style={{ background: v.color }} />}
+                                </button>
+                            </div>
+                            {/* Expand/Collapse Toggle */}
+                            <button 
+                                onClick={() => setPanelExpanded(!panelExpanded)}
+                                className="p-1.5 text-gray-400 hover:text-white rounded transition-colors"
+                                title={panelExpanded ? "Collapse panel" : "Expand panel"}
+                            >
+                                {panelExpanded ? (
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 15 12 9 18 15"></polyline></svg>
+                                ) : (
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                )}
+                            </button>
+                        </div>
+
+                        {/* Tab body (only show if expanded) */}
+                        {panelExpanded && (
+                            <div className="flex-1 overflow-hidden flex flex-col">
+                        {bottomTab === 'testcase' ? (
+                            <div className="flex-1 overflow-y-auto p-4 flex flex-col">
+                                {/* Testcase Pills */}
+                                <div className="flex flex-wrap gap-2 mb-3 pb-1" style={{ width: '100%', shrink: 0 }}>
+                                    {sampleCases.map((tc, idx) => (
+                                        <button
+                                            key={tc.id}
+                                            onClick={() => setActiveTestCaseTab(idx)}
+                                            className={`px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-colors ${activeTestCaseTab === idx ? 'bg-[#333] text-white' : 'bg-[#1e1e1e] text-gray-400 hover:bg-[#2a2a2a]'}`}
+                                            style={{ border: activeTestCaseTab === idx ? '1px solid #555' : '1px solid #333' }}
+                                        >
+                                            Case {idx + 1}
+                                        </button>
+                                    ))}
+                                    <button
+                                        onClick={() => setActiveTestCaseTab(-1)}
+                                        className={`px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-colors flex items-center gap-1.5 ${activeTestCaseTab === -1 ? 'bg-[#07fc03]/10 text-[#07fc03] border-[#07fc03]/40' : 'bg-[#1e1e1e] text-gray-400 hover:bg-[#2a2a2a] border-[#333]'}`}
+                                        style={{ border: `1px solid ${activeTestCaseTab === -1 ? '#07fc0340' : '#333'}` }}
+                                    >
+                                        Custom Input
+                                    </button>
+                                </div>
+                                {/* Selected Testcase Content */}
+                                {activeTestCaseTab === -1 ? (
+                                    <div className="flex-1 flex flex-col pt-1">
+                                        <div className="flex justify-between items-center mb-1">
+                                            <span className="text-[10px] uppercase font-bold text-[#07fc03] tracking-wider">Custom Stdin</span>
+                                        </div>
+                                        <textarea
+                                            value={customInputVal}
+                                            onChange={(e) => setCustomInputVal(e.target.value)}
+                                            className="w-full flex-1 min-h-[80px] text-xs font-mono rounded-lg p-3 outline-none resize-none custom-scrollbar"
+                                            style={{ background: '#0d1117', border: '1px solid #1d3a5f', color: '#93c5fd' }}
+                                            placeholder="Enter your custom stdin inputs perfectly here..."
+                                        />
+                                        <p className="text-[10px] text-gray-600 mt-2">Note: Custom input runs only in "Run" mode. "Submit" will grade against all database test cases.</p>
+                                    </div>
+                                ) : sampleCases[activeTestCaseTab] ? (
+                                    <div className="space-y-3">
+                                        <div>
+                                            <span className="text-[10px] uppercase font-bold text-gray-500 tracking-wider">Input</span>
+                                            <pre className="mt-1 text-xs rounded-lg px-3 py-2.5 whitespace-pre-wrap font-mono" style={{ background: '#0d1117', border: '1px solid #1d3a5f', color: '#93c5fd' }}>
+                                                {sampleCases[activeTestCaseTab].input}
+                                            </pre>
+                                        </div>
+                                        <div>
+                                            <span className="text-[10px] uppercase font-bold text-gray-500 tracking-wider">Expected Output</span>
+                                            <pre className="mt-1 text-xs rounded-lg px-3 py-2.5 whitespace-pre-wrap font-mono" style={{ background: '#001a00', border: '1px solid #166534', color: '#86efac' }}>
+                                                {sampleCases[activeTestCaseTab].expected_output}
+                                            </pre>
+                                        </div>
+                                    </div>
+                                ) : null}
+                            </div>
+                        ) : (
+                            <TestResultPanel result={currentResult} mode={activeResult} isLoading={isBusy} />
+                        )}
+                    </div>
                 )}
             </div>
+            </div>
+            </Split>
         </div>
     );
 
@@ -590,15 +706,28 @@ const ProblemDetail = () => {
                 </div>
             </div>
 
-            {/* Desktop: normal split */}
-            <div className="hidden lg:flex flex-1 overflow-hidden">
-                <div className="flex flex-col overflow-hidden" style={{ width: '40%', borderRight: '1px solid #333' }}>
+            {/* Desktop: resizable split */}
+            <Split
+                sizes={[45, 55]}
+                minSize={300}
+                expandToMin={false}
+                gutterSize={6}
+                gutterAlign="center"
+                snapOffset={30}
+                dragInterval={1}
+                direction="horizontal"
+                cursor="col-resize"
+                className="hidden lg:flex flex-row flex-1 overflow-hidden"
+            >
+                {/* Left Pane: Description */}
+                <div className="flex flex-col h-full overflow-hidden" style={{ minWidth: 0 }}>
                     {DescPane}
                 </div>
-                <div className="flex flex-col overflow-hidden" style={{ width: '60%' }}>
+                {/* Right Pane: Code + Results */}
+                <div className="flex flex-col h-full overflow-hidden" style={{ minWidth: 0, borderLeft: '1px solid #333' }}>
                     {EditorPane}
                 </div>
-            </div>
+            </Split>
 
             {/* True fullscreen overlay — covers entire viewport including navbar */}
             {fullscreen && (

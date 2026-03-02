@@ -15,12 +15,13 @@ const ProfilePage = () => {
     const token = localStorage.getItem('token');
 
     // ... keeping existing state variables unmodified ...
-
     const [stats, setStats] = useState({
         totalSolved: 0,
         weekRank: 0,
         currentStreak: 0,
-        submissions: []
+        submissions: [],
+        totalProblems: { Easy: 0, Medium: 0, Hard: 0, All: 0 },
+        solvedProblems: { Easy: 0, Medium: 0, Hard: 0, All: 0 },
     });
     const [loading, setLoading] = useState(true);
     const [profileUser, setProfileUser] = useState(null);
@@ -29,34 +30,19 @@ const ProfilePage = () => {
     useEffect(() => {
         const fetchProfileData = async () => {
             try {
-                let subs = [];
                 setLoading(true);
                 setErrorMsg('');
                 
-                if (routeId) {
-                    // Fetch other user's profile and submissions
-                    const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/users/${routeId}/profile`, {
-                        headers: { Authorization: `Bearer ${token}` }
-                    });
-                    setProfileUser(res.data.user);
-                    subs = res.data.submissions || [];
-                } else {
-                    // Fetch own submissions
-                    setProfileUser(user);
-                    const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/submissions/history`, {
-                        headers: { Authorization: `Bearer ${token}` }
-                    });
-                    subs = res.data;
-                }
+                const targetId = routeId || user.id;
+                const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/users/${targetId}/profile`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
                 
-                // Calculate Total Solved (Unique problems with 'Accepted' status only)
-                const acceptedSubs = subs.filter(s => s.status === 'Accepted');
-                const uniqueSolvedIds = new Set(acceptedSubs.map(s => s.problem_id));
-                const totalSolved = uniqueSolvedIds.size;
-
-                // Calculate Mocked Week Rank (based on total solved * 10 multiplier for fun)
-                // In a real app, this would be computed on the backend against other users
-                const weekRank = totalSolved > 0 ? Math.max(1, 5000 - (totalSolved * 15)) : 'Unranked';
+                const fetchedUser = res.data.user;
+                const subs = res.data.submissions || [];
+                const backendStats = res.data.stats || {};
+                
+                setProfileUser(fetchedUser);
 
                 // Calculate Current Streak (Consecutive days with at least one submission)
                 let currentStreak = 0;
@@ -95,10 +81,12 @@ const ProfilePage = () => {
                 }
 
                 setStats({
-                    totalSolved,
-                    weekRank,
+                    totalSolved: backendStats.solvedProblems?.All || 0,
+                    weekRank: backendStats.globalRank || 'Unranked',
                     currentStreak,
-                    submissions: subs
+                    submissions: subs,
+                    totalProblems: backendStats.totalProblems || { Easy: 0, Medium: 0, Hard: 0, All: 0 },
+                    solvedProblems: backendStats.solvedProblems || { Easy: 0, Medium: 0, Hard: 0, All: 0 },
                 });
             } catch (err) {
                 console.error("Error fetching profile stats", err);
@@ -304,20 +292,63 @@ const ProfilePage = () => {
 
                 {/* Stats Row */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="border border-gray-800 bg-black p-6 hover:border-[#07fc03]/50 smooth-transition group">
-                        <div className="flex items-center gap-3 mb-4">
-                            <Code2 className="text-gray-500 group-hover:text-[#07fc03] transition-colors" size={20} />
-                            <h3 className="text-sm font-bold tracking-widest text-gray-400">PROBLEMS SOLVED</h3>
+                    {/* Ring Chart + Difficulty Breakdown */}
+                    <div className="border border-gray-800 bg-black p-6 flex items-center justify-between hover:border-[#07fc03]/50 smooth-transition group">
+                        <div className="flex flex-col gap-3">
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs font-bold w-12 text-[#2cbb5d]">Easy</span>
+                                <span className="text-sm font-bold text-gray-300">
+                                    {stats.solvedProblems.Easy}<span className="text-gray-600 text-xs">/{stats.totalProblems.Easy}</span>
+                                </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs font-bold w-12 text-[#ffc01e]">Med</span>
+                                <span className="text-sm font-bold text-gray-300">
+                                    {stats.solvedProblems.Medium}<span className="text-gray-600 text-xs">/{stats.totalProblems.Medium}</span>
+                                </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs font-bold w-12 text-[#ff375f]">Hard</span>
+                                <span className="text-sm font-bold text-gray-300">
+                                    {stats.solvedProblems.Hard}<span className="text-gray-600 text-xs">/{stats.totalProblems.Hard}</span>
+                                </span>
+                            </div>
                         </div>
-                        <div className="text-4xl font-bold text-white group-hover:text-[#07fc03] transition-colors">
-                            {stats.totalSolved}
+
+                        {/* SVG Circular Ring */}
+                        <div className="relative w-28 h-28 flex items-center justify-center shrink-0">
+                            <svg className="absolute top-0 left-0 w-full h-full transform -rotate-90">
+                                <circle cx="56" cy="56" r="48" fill="none" stroke="#2a2a2a" strokeWidth="6" />
+                                
+                                {/* Easy (Green) */}
+                                <circle cx="56" cy="56" r="48" fill="none" stroke="#2cbb5d" strokeWidth="6"
+                                        strokeDasharray={`${(stats.solvedProblems.Easy / (stats.totalProblems.All || 1)) * 301} 301`}
+                                        strokeLinecap="round" />
+                                        
+                                {/* Medium (Yellow) - Offset by Easy length */}
+                                <circle cx="56" cy="56" r="48" fill="none" stroke="#ffc01e" strokeWidth="6"
+                                        strokeDasharray={`${(stats.solvedProblems.Medium / (stats.totalProblems.All || 1)) * 301} 301`}
+                                        strokeDashoffset={`-${(stats.solvedProblems.Easy / (stats.totalProblems.All || 1)) * 301}`}
+                                        strokeLinecap="round" />
+                                        
+                                {/* Hard (Red) - Offset by Easy+Medium length */}
+                                <circle cx="56" cy="56" r="48" fill="none" stroke="#ff375f" strokeWidth="6"
+                                        strokeDasharray={`${(stats.solvedProblems.Hard / (stats.totalProblems.All || 1)) * 301} 301`}
+                                        strokeDashoffset={`-${((stats.solvedProblems.Easy + stats.solvedProblems.Medium) / (stats.totalProblems.All || 1)) * 301}`}
+                                        strokeLinecap="round" />
+                            </svg>
+                            <div className="flex flex-col items-center justify-center z-10">
+                                <span className="text-2xl font-bold text-white transition-colors">{stats.totalSolved}</span>
+                                <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-0.5">Solved</span>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="border border-gray-800 bg-black p-6 hover:border-[#07fc03]/50 smooth-transition group">
+                    {/* Global Rank */}
+                    <div className="border border-gray-800 bg-black p-6 hover:border-[#07fc03]/50 smooth-transition group flex flex-col justify-center">
                         <div className="flex items-center gap-3 mb-4">
                             <Trophy className="text-gray-500 group-hover:text-[#07fc03] transition-colors" size={20} />
-                            <h3 className="text-sm font-bold tracking-widest text-gray-400">WEEKLY RANK</h3>
+                            <h3 className="text-sm font-bold tracking-widest text-gray-400 uppercase">Global Rank</h3>
                         </div>
                         <div className="text-4xl font-bold text-white group-hover:text-[#07fc03] transition-colors">
                             #{stats.weekRank}

@@ -48,6 +48,10 @@ const Navbar = () => {
                             CONTESTS
                             {location.pathname.startsWith('/contests') && <div className="absolute -bottom-6 left-0 right-0 h-0.5 bg-[#07fc03] shadow-[0_0_10px_#07fc03]"></div>}
                         </Link>
+                        <Link to="/roadmap" className={getLinkClass('/roadmap')}>
+                            ROADMAP
+                            {location.pathname === '/roadmap' && <div className="absolute -bottom-6 left-0 right-0 h-0.5 bg-[#07fc03] shadow-[0_0_10px_#07fc03]"></div>}
+                        </Link>
                         <Link to="/notes" className={getLinkClass('/notes')}>
                             NOTES
                             {location.pathname === '/notes' && <div className="absolute -bottom-6 left-0 right-0 h-0.5 bg-[#07fc03] shadow-[0_0_10px_#07fc03]"></div>}
@@ -127,6 +131,7 @@ const Navbar = () => {
                 <>
                     <Link to="/problems" className="text-lg font-mono tracking-widest uppercase text-white hover:text-[#07fc03] w-full border-b border-gray-800 pb-3" onClick={() => setIsMobileMenuOpen(false)}>CHALLENGES</Link>
                     <Link to="/contests" className="text-lg font-mono tracking-widest uppercase text-white hover:text-[#07fc03] w-full border-b border-gray-800 pb-3" onClick={() => setIsMobileMenuOpen(false)}>CONTESTS</Link>
+                    <Link to="/roadmap" className="text-lg font-mono tracking-widest uppercase text-white hover:text-[#07fc03] w-full border-b border-gray-800 pb-3" onClick={() => setIsMobileMenuOpen(false)}>ROADMAP</Link>
                     <Link to="/notes" className="text-lg font-mono tracking-widest uppercase text-white hover:text-[#07fc03] w-full border-b border-gray-800 pb-3" onClick={() => setIsMobileMenuOpen(false)}>NOTES</Link>
                     
                     <Link to="/profile" className="flex items-center space-x-3 text-lg font-mono tracking-widest uppercase text-white hover:text-[#07fc03] w-full border-b border-gray-800 pb-3 mt-4" onClick={() => setIsMobileMenuOpen(false)}>

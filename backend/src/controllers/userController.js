@@ -157,9 +157,9 @@ exports.getUserPublicProfile = async (req, res) => {
 
         const user = users[0];
 
-        // Fetch user's submissions
+        // Fetch user's submissions (now including difficulty from problems)
         const [submissions] = await pool.query(`
-            SELECT s.id, s.problem_id, COALESCE(p.title, 'Practice') as problem_title,
+            SELECT s.id, s.problem_id, COALESCE(p.title, 'Practice') as problem_title, p.difficulty,
                    s.language, s.status, s.runtime, s.submitted_at 
             FROM submissions s
             LEFT JOIN problems p ON s.problem_id = p.id
@@ -167,7 +167,61 @@ exports.getUserPublicProfile = async (req, res) => {
             ORDER BY s.submitted_at DESC
         `, [id]);
 
-        res.status(200).json({ user, submissions });
+        // Get total count of problems in DB grouped by difficulty
+        const [totalProblemsQuery] = await pool.query(`
+            SELECT difficulty, COUNT(*) as count 
+            FROM problems 
+            GROUP BY difficulty
+        `);
+        const totalProblems = { Easy: 0, Medium: 0, Hard: 0, All: 0 };
+        totalProblemsQuery.forEach(row => {
+            if (row.difficulty in totalProblems) {
+                totalProblems[row.difficulty] = row.count;
+            }
+            totalProblems.All += row.count;
+        });
+
+        // Get user's unique solved problems grouped by difficulty
+        const [solvedProblemsQuery] = await pool.query(`
+            SELECT p.difficulty, COUNT(DISTINCT s.problem_id) as count
+            FROM submissions s
+            JOIN problems p ON s.problem_id = p.id
+            WHERE s.user_id = ? AND s.status = 'Accepted'
+            GROUP BY p.difficulty
+        `, [id]);
+        
+        const solvedProblems = { Easy: 0, Medium: 0, Hard: 0, All: 0 };
+        solvedProblemsQuery.forEach(row => {
+            if (row.difficulty in solvedProblems) {
+                solvedProblems[row.difficulty] = row.count;
+            }
+            solvedProblems.All += row.count;
+        });
+
+        // Calculate User's Global Rank
+        // Rank = 1 + (Number of users who have solved strictly MORE unique problems than this user)
+        const [rankQuery] = await pool.query(`
+            SELECT 1 + COUNT(*) as rank 
+            FROM (
+                SELECT user_id, COUNT(DISTINCT problem_id) as solved_count 
+                FROM submissions 
+                WHERE status = 'Accepted'
+                GROUP BY user_id
+                HAVING solved_count > ?
+            ) as higher_solvers
+        `, [solvedProblems.All]);
+        
+        const globalRank = rankQuery[0].rank;
+
+        res.status(200).json({ 
+            user, 
+            submissions,
+            stats: {
+                totalProblems,
+                solvedProblems,
+                globalRank
+            }
+        });
 
     } catch (error) {
         console.error("Error fetching user public profile:", error);

@@ -1,45 +1,59 @@
 const pool = require('../config/db');
 const { executeCode } = require('../services/codeExecutionService');
 
-// Helper: Get driver_code for a problem+language (returns null if not found)
+// Helper to fetch driver code
 const getDriverCode = async (problemId, language) => {
     const [rows] = await pool.query(
         'SELECT driver_code FROM problem_templates WHERE problem_id = ? AND language = ?',
-        [problemId, language.toLowerCase()]
+        [problemId, language]
     );
     return rows.length > 0 ? rows[0].driver_code : null;
 };
 
-// Helper: Build the final code to execute
-// If a driver exists, inject user code into it; else use user code directly (stdin mode)
-const buildFinalCode = (driverCode, userCode) => {
-    if (!driverCode) return userCode;
+// Helper to build final code
+const buildFinalCode = (userCode, driverCode, language) => {
+    if (!driverCode) return userCode; // fallback to raw
+    
+    // Inject user code into the placeholder
     return driverCode.replace('{{USER_CODE}}', userCode);
 };
 
 // @desc    Run code against sample test cases (no submission saved)
 exports.runCode = async (req, res) => {
     try {
-        const { problemId, language, code } = req.body;
+        const { problemId, language, code, customInput } = req.body;
 
         if (!problemId || !language || !code) {
             return res.status(400).json({ message: 'problemId, language, and code are required.' });
         }
 
-        // Fetch SAMPLE (non-hidden) test cases only
-        const [testCases] = await pool.query(
-            'SELECT * FROM test_cases WHERE problem_id = ? AND is_hidden = FALSE',
-            [problemId]
-        );
+        console.log('--- USER RAN CODE ---');
+        console.log(`Language: ${language}`);
+        console.log(code);
+        console.log('---------------------');
 
-        if (testCases.length === 0) {
-            return res.status(400).json({ message: 'No sample test cases found for this problem.' });
+        let testCasesToRun = [];
+
+        // Distinguish between running samples vs. running a specific custom input string
+        if (customInput !== undefined) {
+            testCasesToRun = [{ input: customInput, expected_output: '' }];
+        } else {
+            // Fetch SAMPLE (non-hidden) test cases only
+            const [testCases] = await pool.query(
+                'SELECT * FROM test_cases WHERE problem_id = ? AND is_hidden = FALSE',
+                [problemId]
+            );
+
+            if (testCases.length === 0) {
+                return res.status(400).json({ message: 'No sample test cases found. Please use Custom Input to test your code.' });
+            }
+            testCasesToRun = testCases;
         }
 
-        const driverCode  = await getDriverCode(problemId, language);
-        const finalCode   = buildFinalCode(driverCode, code);
+        const driverCode = await getDriverCode(problemId, language);
+        const finalCode = buildFinalCode(code, driverCode, language);
 
-        const result = await executeCode(language, problemId, finalCode, testCases);
+        const result = await executeCode(language, problemId, finalCode, testCasesToRun);
 
         res.status(200).json({
             status:             result.status,
@@ -78,19 +92,18 @@ exports.submitCode = async (req, res) => {
             [problemId]
         );
 
-        const driverCode = await getDriverCode(problemId, language);
-        const finalCode  = buildFinalCode(driverCode, code);
-
         // Execute code
         let execResult = { status: 'Pending', runtime: 0 };
         if (testCases.length > 0) {
+            const driverCode = await getDriverCode(problemId, language);
+            const finalCode = buildFinalCode(code, driverCode, language);
             execResult = await executeCode(language, problemId, finalCode, testCases);
         }
 
         const status  = execResult.status;
         const runtime = execResult.runtime || 0;
 
-        // Save submission to DB (store user's code, NOT the wrapped code)
+        // Save submission to DB
         const [insertResult] = await pool.query(
             'INSERT INTO submissions (user_id, problem_id, language, code, status, runtime, contest_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
             [userId, problemId, language, code, status, runtime, contestId || null]
