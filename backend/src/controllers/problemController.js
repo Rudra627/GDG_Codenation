@@ -122,7 +122,7 @@ exports.getSampleTestCases = async (req, res) => {
     try {
         const { id } = req.params;
         const [testCases] = await pool.query(
-            'SELECT id, input, expected_output FROM test_cases WHERE problem_id = ? AND is_hidden = 0',
+            'SELECT id, input, expected_output, is_hidden FROM test_cases WHERE problem_id = ?',
             [id]
         );
         res.status(200).json(testCases);

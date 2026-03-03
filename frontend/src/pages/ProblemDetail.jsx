@@ -7,7 +7,7 @@ import Split from 'react-split';
 import {
     Play, Send, RotateCcw, FileText, Code2,
     CheckCheck, XCircle, AlertTriangle, Clock, CheckCircle2,
-    Maximize2, Minimize2
+    Maximize2, Minimize2, TerminalSquare, CheckSquare, Beaker, Terminal, ChevronUp, ChevronDown
 } from 'lucide-react';
 
 // ─── Language config ──────────────────────────────────────────────────────────
@@ -173,7 +173,7 @@ const ProblemDetail = () => {
     const [hasTemplate, setHasTemplate] = useState(false); // Indicates if this is Function Mode
     const [mobileTab, setMobileTab] = useState('description');
     const [bottomTab, setBottomTab] = useState('testcase'); // default to testcase
-    const [panelExpanded, setPanelExpanded] = useState(false); // bottom panel toggle
+    const [panelExpanded, setPanelExpanded] = useState(true); // bottom panel toggle (results/testcases)
     const [activeTestCaseTab, setActiveTestCaseTab] = useState(0); // For multiple testcases (-1 means custom)
     const [customInputVal, setCustomInputVal] = useState('');
     const [fullscreen, setFullscreen] = useState(false);
@@ -196,20 +196,26 @@ const ProblemDetail = () => {
         const token = localStorage.getItem('token');
         const headers = { Authorization: `Bearer ${token}` };
 
-        // Fetch problem first (public route), then samples independently
+        // 1. Fetch Problem
         axios.get(`${import.meta.env.VITE_API_URL}/api/problems/${id}`)
             .then((probRes) => {
                 setProblem(probRes.data);
-                // Fetch samples separately — public route, no auth needed
-                return axios.get(`${import.meta.env.VITE_API_URL}/api/problems/${id}/samples`)
+                
+                // 2. Fetch Samples Independently (Do not chain template fetch to this)
+                axios.get(`${import.meta.env.VITE_API_URL}/api/problems/${id}/samples`)
                     .then((samplesRes) => {
                         const samples = samplesRes.data || [];
                         setSampleCases(samples);
                         setActiveTestCaseTab(samples.length > 0 ? 0 : -1);
-                        
-                        // Fetch starter template
-                        return axios.get(`${import.meta.env.VITE_API_URL}/api/problems/${id}/template/${language}`);
                     })
+                    .catch((err) => {
+                        console.error('Failed to load samples:', err);
+                        setSampleCases([]);
+                        setActiveTestCaseTab(-1);
+                    });
+
+                // 3. Fetch Template Independently (So a 404 here NEVER clears samples)
+                axios.get(`${import.meta.env.VITE_API_URL}/api/problems/${id}/template/${language}`)
                     .then(tplRes => {
                         if (tplRes.data?.starter_code) {
                             setCode(tplRes.data.starter_code);
@@ -220,10 +226,6 @@ const ProblemDetail = () => {
                         }
                     })
                     .catch((err) => {
-                        // If template fetch fails or samples fail
-                        if (err.response?.status !== 404) console.error(err);
-                        setSampleCases(err.response?.status === 404 ? [] : []);
-                        setActiveTestCaseTab(-1);
                         setCode(TEMPLATES[language] || '');
                         setHasTemplate(false);
                     });
@@ -336,84 +338,87 @@ const ProblemDetail = () => {
         </div>
     );
 
-    /* ── Description panel ─────────────────────────────────────────── */
+    /* ── Left Pane (Description Only) ─────────────────────────────────────────── */
     const DescPane = (
         <div className="h-full flex flex-col overflow-hidden" style={{ background: '#1a1a1a' }}>
-            {/* Header */}
-            <div className="px-4 py-2.5 shrink-0 flex items-center gap-2"
+            {/* Header Tabs */}
+            <div className="px-2 py-2 shrink-0 flex flex-nowrap items-center gap-1 overflow-x-auto custom-scrollbar"
                  style={{ background: '#262626', borderBottom: '1px solid #333' }}>
-                <FileText size={13} style={{ color: '#07fc03' }} />
-                <span className="text-xs font-semibold" style={{ color: '#eee' }}>Description</span>
+                <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap"
+                        style={{ color: '#07fc03', background: '#333' }}>
+                    <FileText size={13} /> Description
+                </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4 sm:p-5">
+            <div className="flex-1 overflow-y-auto p-4 sm:p-5 flex flex-col">
                 {/* Title + badge */}
-                <div className="flex flex-wrap items-start gap-2 mb-3">
-                    <h1 className="text-base sm:text-lg font-bold text-gray-100 leading-tight">
-                        {problem.id}. {problem.title}
-                    </h1>
-                    <span className={`mt-0.5 px-2 py-0.5 text-xs font-bold rounded shrink-0
-                        ${problem.difficulty === 'Easy'   ? 'text-green-300  bg-green-900/50'  :
-                          problem.difficulty === 'Medium' ? 'text-yellow-300 bg-yellow-900/50' :
-                                                            'text-red-300    bg-red-900/50'}`}>
-                        {problem.difficulty}
-                    </span>
-                </div>
-
-                {/* Topics */}
-                {(() => {
-                    const topicsArr = problem.topics
-                        ? (Array.isArray(problem.topics)
-                            ? problem.topics
-                            : problem.topics.split(',').map(t => t.trim()).filter(Boolean))
-                        : [];
-                    return topicsArr.length > 0 ? (
-                        <div className="flex flex-wrap gap-1.5 mb-4">
-                            {topicsArr.map(t => (
-                                <span key={t} className="px-2 py-0.5 text-[11px] rounded"
-                                      style={{ background: '#2a2a2a', border: '1px solid #444', color: '#aaa' }}>
-                                    {t}
-                                </span>
-                            ))}
+                        <div className="flex flex-wrap items-start gap-2 mb-3">
+                            <h1 className="text-base sm:text-lg font-bold text-gray-100 leading-tight">
+                                {problem.id}. {problem.title}
+                            </h1>
+                            <span className={`mt-0.5 px-2 py-0.5 text-xs font-bold rounded shrink-0
+                                ${problem.difficulty === 'Easy'   ? 'text-green-300  bg-green-900/50'  :
+                                  problem.difficulty === 'Medium' ? 'text-yellow-300 bg-yellow-900/50' :
+                                                                    'text-red-300    bg-red-900/50'}`}>
+                                {problem.difficulty}
+                            </span>
                         </div>
-                    ) : null;
-                })()}
 
-                {/* Body */}
-                <div className="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap mb-5">
-                    {problem.description}
-                </div>
+                        {/* Topics */}
+                        {(() => {
+                            const topicsArr = problem.topics
+                                ? (Array.isArray(problem.topics)
+                                    ? problem.topics
+                                    : problem.topics.split(',').map(t => t.trim()).filter(Boolean))
+                                : [];
+                            return topicsArr.length > 0 ? (
+                                <div className="flex flex-wrap gap-1.5 mb-4">
+                                    {topicsArr.map(t => (
+                                        <span key={t} className="px-2 py-0.5 text-[11px] rounded"
+                                              style={{ background: '#2a2a2a', border: '1px solid #444', color: '#aaa' }}>
+                                            {t}
+                                        </span>
+                                    ))}
+                                </div>
+                            ) : null;
+                        })()}
 
-                {/* Sample Test Cases */}
-                {sampleCases.length > 0 && (
-                    <div className="space-y-4">
-                        {sampleCases.map((tc, idx) => (
-                            <div key={tc.id}
-                                 style={{ background: '#212121', border: '1px solid #333', borderRadius: '8px', overflow: 'hidden' }}>
-                                <div className="px-3 py-1.5 text-xs font-bold"
-                                     style={{ background: '#2a2a2a', borderBottom: '1px solid #333', color: '#aaa', letterSpacing: '0.05em' }}>
-                                    Example {idx + 1}
-                                </div>
-                                <div className="p-3 space-y-2">
-                                    <div>
-                                        <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Input</span>
-                                        <pre className="mt-1 text-xs rounded px-3 py-2 whitespace-pre-wrap font-mono leading-relaxed"
-                                             style={{ background: '#0d1117', border: '1px solid #1d3a5f', color: '#93c5fd' }}>
-                                            {tc.input || '(none)'}
-                                        </pre>
+                        {/* Body */}
+                        <div className="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap mb-5">
+                            {problem.description}
+                        </div>
+
+                        {/* Sample Test Cases Header */}
+                        {sampleCases.length > 0 && (
+                            <div className="space-y-4">
+                                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-[#333] pb-2">Examples</h3>
+                                {sampleCases.map((tc, idx) => (
+                                    <div key={tc.id}
+                                         style={{ background: '#212121', border: '1px solid #333', borderRadius: '8px', overflow: 'hidden' }}>
+                                        <div className="px-3 py-1.5 text-xs font-bold"
+                                             style={{ background: '#2a2a2a', borderBottom: '1px solid #333', color: '#aaa', letterSpacing: '0.05em' }}>
+                                            Test Case {idx + 1}
+                                        </div>
+                                        <div className="p-3 space-y-2">
+                                            <div>
+                                                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Input</span>
+                                                <pre className="mt-1 text-xs rounded px-3 py-2 whitespace-pre-wrap font-mono leading-relaxed"
+                                                     style={{ background: '#0d1117', border: '1px solid #1d3a5f', color: '#93c5fd' }}>
+                                                    {tc.input || '(none)'}
+                                                </pre>
+                                            </div>
+                                            <div>
+                                                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Output</span>
+                                                <pre className="mt-1 text-xs rounded px-3 py-2 whitespace-pre-wrap font-mono leading-relaxed"
+                                                     style={{ background: '#001a00', border: '1px solid #166534', color: '#86efac' }}>
+                                                    {tc.expected_output || '(none)'}
+                                                </pre>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Output</span>
-                                        <pre className="mt-1 text-xs rounded px-3 py-2 whitespace-pre-wrap font-mono leading-relaxed"
-                                             style={{ background: '#001a00', border: '1px solid #166534', color: '#86efac' }}>
-                                            {tc.expected_output || '(none)'}
-                                        </pre>
-                                    </div>
-                                </div>
+                                ))}
                             </div>
-                        ))}
-                    </div>
-                )}
+                        )}
             </div>
         </div>
     );
@@ -452,6 +457,29 @@ const ProblemDetail = () => {
                     </span>
                 )}
                 <div className="flex items-center gap-1.5">
+                    {/* Render Run/Submit at the top ONLY in fullscreen mode */}
+                    {fullscreen && (
+                        <div className="flex items-center gap-2 mr-2">
+                            <button
+                                onClick={handleRun}
+                                disabled={isBusy}
+                                className="flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-[4px] text-[12px] font-semibold hover:bg-[#4a4a4a] transition-all disabled:opacity-50"
+                                style={{ background: '#333', color: '#e5e5e5', border: '1px solid #4d4d4d' }}
+                            >
+                                {running ? <Spinner color="#fff" size={11} /> : <><Play size={11} fill="#e5e5e5"/> Run</>}
+                            </button>
+                            <button
+                                onClick={handleSubmit}
+                                disabled={isBusy}
+                                className="flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-[4px] text-[12px] font-semibold transition-all hover:bg-[#00e600] disabled:opacity-50"
+                                style={{ background: '#00ff00', color: '#000' }}
+                            >
+                                {submitting ? <Spinner color="#003300" size={11} /> : <><Send size={11} /> Submit</>}
+                            </button>
+                            <div className="w-[1px] h-[16px] bg-[#444] mx-1"></div>
+                        </div>
+                    )}
+                    
                     <button
                         onClick={() => {
                             // Re-fetch template (or fall back to generic) on reset
@@ -474,21 +502,9 @@ const ProblemDetail = () => {
                 </div>
             </div>
 
-            <Split
-                sizes={panelExpanded ? [60, 40] : [100, 0]}
-                minSize={[100, 40]}
-                expandToMin={false}
-                gutterSize={6}
-                gutterAlign="center"
-                snapOffset={30}
-                dragInterval={1}
-                direction="vertical"
-                cursor="row-resize"
-                className="flex flex-col flex-1 overflow-hidden lg:flex-none lg:h-full"
-                style={{ display: 'flex' }}
-            >
-                {/* Monaco editor top half */}
-                <div className="flex-1 min-h-0 flex flex-col">
+            {fullscreen ? (
+                /* Fullscreen View: Just the editor */
+                <div className="flex-1 min-h-0 flex flex-col pt-1" style={{ background: '#1e1e1e' }}>
                     <Editor
                         height="100%"
                         language={langConfig.mono}
@@ -497,7 +513,7 @@ const ProblemDetail = () => {
                         onChange={v => setCode(v || '')}
                         options={{
                             minimap: { enabled: false },
-                            fontSize: 15,
+                            fontSize: 14,
                             scrollBeyondLastLine: false,
                             padding: { top: 12 },
                             fontFamily: "'JetBrains Mono','Cascadia Code','Fira Code',monospace",
@@ -508,185 +524,213 @@ const ProblemDetail = () => {
                         }}
                     />
                 </div>
+            ) : (
+                <Split
+                    sizes={panelExpanded ? [50, 50] : [100, 0]}
+                    minSize={[100, 40]}
+                    expandToMin={false}
+                    gutterSize={6}
+                    gutterAlign="center"
+                    snapOffset={25}
+                    dragInterval={1}
+                    direction="vertical"
+                    cursor="row-resize"
+                    className="flex flex-col flex-1 h-full min-h-0 overflow-hidden"
+                    style={{ display: 'flex' }}
+                >
+                    {/* Monaco editor top half */}
+                    <div className="min-h-0 flex flex-col pt-1" style={{ background: '#1e1e1e' }}>
+                        <Editor
+                            height="100%"
+                            language={langConfig.mono}
+                            theme="vs-dark"
+                            value={code}
+                            onChange={v => setCode(v || '')}
+                            options={{
+                                minimap: { enabled: false },
+                                fontSize: 14,
+                                scrollBeyondLastLine: false,
+                                padding: { top: 12 },
+                                fontFamily: "'JetBrains Mono','Cascadia Code','Fira Code',monospace",
+                                fontLigatures: true,
+                                tabSize: 4,
+                                renderLineHighlight: 'gutter',
+                                bracketPairColorization: { enabled: true },
+                            }}
+                        />
+                    </div>
 
-                {/* Bottom Testcase half */}
-                <div className="flex flex-col overflow-hidden" style={{ minHeight: '40px' }}>
+                {/* Bottom Testcase panel half */}
+                <div className="flex flex-col min-h-0" style={{ background: '#1e1e1e' }}>
                     
-                    {/* Bottom bar: Run + Submit (like LeetCode) */}
-                    <div className="shrink-0 flex items-center justify-between px-4 py-2.5"
-                         style={{ background: '#2d2d2d', borderTop: '1px solid #3a3a3a' }}>
-                        {/* Left: verdict dot when result exists */}
+                    {/* Console & Action Bar (Middle Splitter) */}
+                    <div className="shrink-0 flex items-center justify-between px-4 py-3" style={{ background: '#262626', borderTop: '1px solid #333', borderBottom: '1px solid #333' }}>
+                        {/* Ready Status / Left Side */}
                         <div className="flex items-center gap-2">
-                            {v && (
-                                <span className="flex items-center gap-1.5 text-xs font-semibold" style={{ color: v.color }}>
-                                    <span className="w-2 h-2 rounded-full inline-block" style={{ background: v.color }} />
-                                    {currentResult?.status}
-                                </span>
-                            )}
-                            {!v && !isBusy && (
-                                <span className="text-xs text-gray-600">Ready</span>
-                            )}
-                            {isBusy && (
-                                <span className="flex items-center gap-1.5 text-xs text-gray-400">
-                                    <Spinner color="#07fc03" size={12} />
+                            {isBusy ? (
+                                <span className="flex items-center gap-1.5 text-xs text-[#00ff00]">
+                                    <Spinner color="#00ff00" size={12} />
                                     {running ? 'Running...' : 'Submitting...'}
                                 </span>
+                            ) : (
+                                <span className="text-[13px] font-semibold text-[#8c8c8c]">Ready</span>
                             )}
                         </div>
 
-                        {/* Right: Run + Submit */}
-                        <div className="flex items-center gap-2">
+                        {/* Run and Submit / Right Side */}
+                        <div className="flex items-center gap-2.5">
                             <button
                                 onClick={handleRun}
                                 disabled={isBusy}
-                                className="flex items-center gap-1.5 px-4 py-1.5 rounded text-xs font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                                style={{ background: '#3a3a3a', color: '#ddd', border: '1px solid #555' }}
-                                onMouseEnter={e => { if (!isBusy) e.currentTarget.style.background = '#4a4a4a'; }}
-                                onMouseLeave={e => { e.currentTarget.style.background = '#3a3a3a'; }}
+                                className="flex items-center justify-center gap-1.5 px-5 py-1.5 rounded-[6px] text-[13px] font-semibold hover:bg-[#4a4a4a] transition-all disabled:opacity-50"
+                                style={{ background: '#3b3b3b', color: '#e5e5e5', border: '1px solid #4d4d4d', minWidth: '70px' }}
                             >
-                                {running
-                                    ? <Spinner color="#fff" size={12} />
-                                    : <Play size={11} fill="#ddd" />
-                                }
-                                <span>Run</span>
+                                {running ? <Spinner color="#fff" size={12} /> : <><Play size={12} fill="#e5e5e5"/> Run</>}
                             </button>
-
                             <button
                                 onClick={handleSubmit}
                                 disabled={isBusy}
-                                className="flex items-center gap-1.5 px-4 py-1.5 rounded text-xs font-bold transition-all disabled:cursor-not-allowed"
-                                style={{
-                                    background: isBusy ? '#059900' : '#07fc03',
-                                    color: '#000',
-                                    boxShadow: isBusy ? 'none' : '0 0 12px #07fc0350',
-                                }}
+                                className="flex items-center justify-center gap-1.5 px-5 py-1.5 rounded-[6px] text-[13px] font-semibold transition-all hover:bg-[#00e600] disabled:opacity-50"
+                                style={{ background: '#00ff00', color: '#000', minWidth: '80px' }}
                             >
-                                {submitting
-                                    ? <Spinner color="#003300" size={12} />
-                                    : <Send size={11} />
-                                }
-                                <span>Submit</span>
+                                {submitting ? <Spinner color="#003300" size={12} /> : <><Send size={12} /> Submit</>}
                             </button>
                         </div>
                     </div>
 
-                    {/* Bottom panel tabs + collapse logic */}
-                    <div className="shrink-0 flex flex-col transition-all duration-300 ease-in-out flex-1" style={{ borderTop: '1px solid #3a3a3a', background: '#1a1a1a' }}>
-                        {/* Tab headers */}
-                        <div className="flex items-center justify-between shrink-0 px-2" style={{ borderBottom: '1px solid #333', background: '#222', height: '40px' }}>
-                            <div className="flex items-center h-full">
-                                <button
-                                    onClick={() => { setBottomTab('testcase'); setPanelExpanded(true); }}
-                                    className="px-4 h-full text-xs font-semibold transition-colors flex items-center"
-                                    style={{
-                                        color: (bottomTab === 'testcase' && panelExpanded) ? '#eee' : '#666',
-                                        borderBottom: (bottomTab === 'testcase' && panelExpanded) ? '2px solid #07fc03' : '2px solid transparent',
-                                    }}
-                                >
-                                    Testcase
-                                </button>
-                                <button
-                                    onClick={() => { setBottomTab('result'); setPanelExpanded(true); }}
-                                    className="px-4 h-full text-xs font-semibold transition-colors flex items-center gap-1.5"
-                                    style={{
-                                        color: (bottomTab === 'result' && panelExpanded) ? '#eee' : '#666',
-                                        borderBottom: (bottomTab === 'result' && panelExpanded) ? '2px solid #07fc03' : '2px solid transparent',
-                                    }}
-                                >
-                                    Test Result
-                                    {v && <span className="w-1.5 h-1.5 rounded-full" style={{ background: v.color }} />}
-                                </button>
-                            </div>
-                            {/* Expand/Collapse Toggle */}
-                            <button 
-                                onClick={() => setPanelExpanded(!panelExpanded)}
-                                className="p-1.5 text-gray-400 hover:text-white rounded transition-colors"
-                                title={panelExpanded ? "Collapse panel" : "Expand panel"}
+                    {/* Tab headers */}
+                    <div className="flex items-center justify-between shrink-0 px-2" style={{ background: '#1e1e1e', height: '40px', borderBottom: '1px solid #333' }}>
+                        <div className="flex items-center h-full gap-1">
+                            <button
+                                onClick={() => { setBottomTab('testcase'); setPanelExpanded(true); }}
+                                className="px-3 h-full text-[13px] font-semibold transition-colors flex items-center gap-1.5"
+                                style={{ color: (bottomTab === 'testcase') ? '#00ff00' : '#8c8c8c' }}
                             >
-                                {panelExpanded ? (
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 15 12 9 18 15"></polyline></svg>
-                                ) : (
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                                )}
+                                Testcase
+                            </button>
+                            <button
+                                onClick={() => { setBottomTab('result'); setPanelExpanded(true); }}
+                                className="px-3 h-full text-[13px] font-semibold transition-colors flex items-center gap-1.5"
+                                style={{ color: (bottomTab === 'result') ? '#e5e5e5' : '#8c8c8c' }}
+                            >
+                                Test Result
                             </button>
                         </div>
+                        {/* Expand/Collapse Toggle - Right side of toolbar */}
+                        <button 
+                            onClick={() => setPanelExpanded(!panelExpanded)}
+                            className="p-1.5 text-gray-400 hover:text-white rounded transition-colors hidden lg:block"
+                            title={panelExpanded ? "Collapse panel" : "Expand panel"}
+                        >
+                            {panelExpanded ? (
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 15 12 9 18 15"></polyline></svg>
+                            ) : (
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            )}
+                        </button>
+                    </div>
 
-                        {/* Tab body (only show if expanded) */}
-                        {panelExpanded && (
-                            <div className="flex-1 overflow-hidden flex flex-col">
-                        {bottomTab === 'testcase' ? (
-                            <div className="flex-1 overflow-y-auto p-4 flex flex-col">
-                                {/* Testcase Pills */}
-                                <div className="flex flex-wrap gap-2 mb-3 pb-1" style={{ width: '100%', shrink: 0 }}>
-                                    {sampleCases.map((tc, idx) => (
-                                        <button
-                                            key={tc.id}
-                                            onClick={() => setActiveTestCaseTab(idx)}
-                                            className={`px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-colors ${activeTestCaseTab === idx ? 'bg-[#333] text-white' : 'bg-[#1e1e1e] text-gray-400 hover:bg-[#2a2a2a]'}`}
-                                            style={{ border: activeTestCaseTab === idx ? '1px solid #555' : '1px solid #333' }}
-                                        >
-                                            Case {idx + 1}
-                                        </button>
-                                    ))}
-                                    <button
-                                        onClick={() => setActiveTestCaseTab(-1)}
-                                        className={`px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-colors flex items-center gap-1.5 ${activeTestCaseTab === -1 ? 'bg-[#07fc03]/10 text-[#07fc03] border-[#07fc03]/40' : 'bg-[#1e1e1e] text-gray-400 hover:bg-[#2a2a2a] border-[#333]'}`}
-                                        style={{ border: `1px solid ${activeTestCaseTab === -1 ? '#07fc0340' : '#333'}` }}
-                                    >
-                                        Custom Input
-                                    </button>
-                                </div>
-                                {/* Selected Testcase Content */}
-                                {activeTestCaseTab === -1 ? (
-                                    <div className="flex-1 flex flex-col pt-1">
-                                        <div className="flex justify-between items-center mb-1">
-                                            <span className="text-[10px] uppercase font-bold text-[#07fc03] tracking-wider">Custom Stdin</span>
+                    {/* Tab body (only show if expanded) */}
+                    {panelExpanded && (
+                        <div className="flex-1 overflow-hidden flex flex-col" style={{ background: '#1e1e1e' }}>
+                            {bottomTab === 'testcase' ? (
+                                <div className="flex-1 overflow-y-auto p-4 flex flex-col pt-4">
+                                    {/* Testcase Pills */}
+                                    <div className="flex flex-wrap gap-2 mb-5 shrink-0">
+                                        {sampleCases.map((tc, idx) => (
+                                                <button
+                                                    key={tc.id}
+                                                    onClick={() => setActiveTestCaseTab(idx)}
+                                                    className="px-4 py-1.5 rounded-[6px] text-[13px] font-semibold whitespace-nowrap transition-colors"
+                                                    style={{
+                                                        background: activeTestCaseTab === idx ? '#333' : 'transparent',
+                                                        color: activeTestCaseTab === idx ? '#fff' : '#8c8c8c',
+                                                    }}
+                                                >
+                                                    Case {idx + 1}
+                                                </button>
+                                            ))}
+                                            <button
+                                                onClick={() => setActiveTestCaseTab(-1)}
+                                                className="px-4 py-1.5 rounded-[6px] text-sm font-semibold whitespace-nowrap transition-colors flex items-center justify-center"
+                                                style={{
+                                                    background: activeTestCaseTab === -1 ? '#333' : 'transparent',
+                                                    color: activeTestCaseTab === -1 ? '#00b8a3' : '#8c8c8c',
+                                                }}
+                                            >
+                                                +
+                                            </button>
                                         </div>
-                                        <textarea
-                                            value={customInputVal}
-                                            onChange={(e) => setCustomInputVal(e.target.value)}
-                                            className="w-full flex-1 min-h-[80px] text-xs font-mono rounded-lg p-3 outline-none resize-none custom-scrollbar"
-                                            style={{ background: '#0d1117', border: '1px solid #1d3a5f', color: '#93c5fd' }}
-                                            placeholder="Enter your custom stdin inputs perfectly here..."
-                                        />
-                                        <p className="text-[10px] text-gray-600 mt-2">Note: Custom input runs only in "Run" mode. "Submit" will grade against all database test cases.</p>
+                                        {/* Selected Testcase Content */}
+                                        {activeTestCaseTab === -1 ? (
+                                            <div className="flex-1 flex flex-col pl-1">
+                                                <div className="flex justify-between items-center mb-1">
+                                                    <span className="text-[10px] uppercase font-bold text-[#00b8a3] tracking-wider">Custom Stdin</span>
+                                                </div>
+                                                <textarea
+                                                    value={customInputVal}
+                                                    onChange={(e) => setCustomInputVal(e.target.value)}
+                                                    className="w-full flex-1 min-h-[80px] text-[13px] font-mono rounded-[8px] p-3 outline-none resize-none custom-scrollbar"
+                                                    style={{ background: '#262626', border: '1px solid #333', color: '#e5e5e5' }}
+                                                    placeholder="Enter your custom stdin inputs perfectly here..."
+                                                />
+                                                <p className="text-[10px] text-gray-500 mt-2">Note: Custom input runs only in "Run" mode. "Submit" tests hidden edge cases.</p>
+                                            </div>
+                                        ) : (
+                                            // Handle missing or loading test cases cleanly without crashing
+                                            sampleCases[activeTestCaseTab] ? (
+                                                <div className="space-y-4 pl-1">
+                                                    {/* Parse lines of input and format as Name = \n [Value] */}
+                                                    {(sampleCases[activeTestCaseTab].input || '').split('\n').filter(Boolean).map((line, i) => {
+                                                        const eqIdx = line.indexOf('=');
+                                                        if (eqIdx !== -1) {
+                                                            const name = line.substring(0, eqIdx).trim();
+                                                            const val = line.substring(eqIdx + 1).trim();
+                                                            return (
+                                                                <div key={i}>
+                                                                    <p className="text-[12px] font-bold mb-1.5 tracking-wider" style={{ color: '#d4d4d4' }}>{name} =</p>
+                                                                    <div className="px-3.5 py-2.5 rounded-[6px] transition-colors" style={{ background: '#2e2e2e', color: '#e5e5e5', fontFamily: 'monospace', fontSize: '13px' }}>
+                                                                        {val}
+                                                                    </div>
+                                                                </div>
+                                                            );
+                                                        }
+                                                        return (
+                                                            <div key={i} className="px-3.5 py-2.5 rounded-[6px] transition-colors" style={{ background: '#2e2e2e', color: '#e5e5e5', fontFamily: 'monospace', fontSize: '13px' }}>
+                                                                {line}
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            ) : (
+                                                <div className="flex items-center gap-2 p-2">
+                                                    <Spinner color="#00ff00" size={14} />
+                                                    <span className="text-gray-400 text-xs">Loading test cases...</span>
+                                                </div>
+                                            )
+                                        )}
                                     </div>
-                                ) : sampleCases[activeTestCaseTab] ? (
-                                    <div className="space-y-3">
-                                        <div>
-                                            <span className="text-[10px] uppercase font-bold text-gray-500 tracking-wider">Input</span>
-                                            <pre className="mt-1 text-xs rounded-lg px-3 py-2.5 whitespace-pre-wrap font-mono" style={{ background: '#0d1117', border: '1px solid #1d3a5f', color: '#93c5fd' }}>
-                                                {sampleCases[activeTestCaseTab].input}
-                                            </pre>
-                                        </div>
-                                        <div>
-                                            <span className="text-[10px] uppercase font-bold text-gray-500 tracking-wider">Expected Output</span>
-                                            <pre className="mt-1 text-xs rounded-lg px-3 py-2.5 whitespace-pre-wrap font-mono" style={{ background: '#001a00', border: '1px solid #166534', color: '#86efac' }}>
-                                                {sampleCases[activeTestCaseTab].expected_output}
-                                            </pre>
-                                        </div>
+                                ) : (
+                                    <div className="p-4 flex-1 overflow-y-auto">
+                                        <TestResultPanel result={currentResult} mode={activeResult} isLoading={isBusy} />
                                     </div>
-                                ) : null}
+                                )}
                             </div>
-                        ) : (
-                            <TestResultPanel result={currentResult} mode={activeResult} isLoading={isBusy} />
                         )}
                     </div>
-                )}
-            </div>
-            </div>
-            </Split>
+                </Split>
+            )}
         </div>
     );
 
     return (
         <div className="flex-grow flex flex-col overflow-hidden" style={{ background: '#1a1a1a' }}>
             {/* Mobile tab bar */}
-            <div className="flex lg:hidden shrink-0" style={{ background: '#222', borderBottom: '1px solid #333' }}>
-                {[{ key: 'description', label: 'Description', Icon: FileText },
+            <div className="flex lg:hidden shrink-0 overflow-x-auto custom-scrollbar" style={{ background: '#222', borderBottom: '1px solid #333' }}>
+                {[{ key: 'description', label: 'Desc', Icon: FileText },
                   { key: 'code', label: 'Code', Icon: Code2 }].map(({ key, label, Icon }) => (
-                    <button key={key} onClick={() => setMobileTab(key)}
-                            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-semibold transition-colors"
+                    <button key={key} onClick={() => { setMobileTab(key); }}
+                            className="flex-1 min-w-[80px] flex items-center justify-center gap-1.5 py-2.5 text-[11px] sm:text-xs font-semibold transition-colors whitespace-nowrap px-2"
                             style={{
                                 color: mobileTab === key ? '#07fc03' : '#666',
                                 borderBottom: mobileTab === key ? '2px solid #07fc03' : '2px solid transparent',
@@ -708,7 +752,7 @@ const ProblemDetail = () => {
 
             {/* Desktop: resizable split */}
             <Split
-                sizes={[45, 55]}
+                sizes={[50, 50]}
                 minSize={300}
                 expandToMin={false}
                 gutterSize={6}
@@ -717,14 +761,14 @@ const ProblemDetail = () => {
                 dragInterval={1}
                 direction="horizontal"
                 cursor="col-resize"
-                className="hidden lg:flex flex-row flex-1 overflow-hidden"
+                className="hidden lg:flex flex-row flex-1 h-full min-h-0 overflow-hidden"
             >
                 {/* Left Pane: Description */}
-                <div className="flex flex-col h-full overflow-hidden" style={{ minWidth: 0 }}>
+                <div className="flex flex-col h-full min-h-0 overflow-hidden" style={{ minWidth: 0 }}>
                     {DescPane}
                 </div>
                 {/* Right Pane: Code + Results */}
-                <div className="flex flex-col h-full overflow-hidden" style={{ minWidth: 0, borderLeft: '1px solid #333' }}>
+                <div className="flex flex-col h-full min-h-0 overflow-hidden" style={{ minWidth: 0, borderLeft: '1px solid #333' }}>
                     {EditorPane}
                 </div>
             </Split>
@@ -749,6 +793,8 @@ const ProblemDetail = () => {
     );
 };
 
+export default ProblemDetail;
+
 // Inject spin animation globally once
 if (typeof document !== 'undefined' && !document.getElementById('spin-style')) {
     const s = document.createElement('style');
@@ -756,5 +802,3 @@ if (typeof document !== 'undefined' && !document.getElementById('spin-style')) {
     s.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
     document.head.appendChild(s);
 }
-
-export default ProblemDetail;

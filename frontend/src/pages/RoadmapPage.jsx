@@ -4,23 +4,23 @@ import { Target } from 'lucide-react';
 
 const roadmapData = [
   { id: 'arrays', label: 'Arrays', x: 50, y: 10, status: 'completed' },
-  { id: 'two-pointers', label: 'Two Pointers', x: 30, y: 30, status: 'in-progress' },
-  { id: 'stack', label: 'Stack', x: 70, y: 30, status: 'locked' },
-  { id: 'binary-search', label: 'Binary Search', x: 20, y: 50, status: 'locked' },
-  { id: 'sliding-window', label: 'Sliding Window', x: 40, y: 50, status: 'locked' },
-  { id: 'linked-list', label: 'Linked List', x: 80, y: 50, status: 'locked' },
-  { id: 'trees', label: 'Trees', x: 50, y: 70, status: 'locked' },
-  { id: 'tries', label: 'Tries', x: 20, y: 90, status: 'locked' },
-  { id: 'backtracking', label: 'Backtracking', x: 80, y: 90, status: 'locked' },
-  { id: 'heap', label: 'Heap / Priority Queue', x: 35, y: 110, status: 'locked' },
-  { id: 'graphs', label: 'Graphs', x: 65, y: 110, status: 'locked' },
-  { id: '1d-dp', label: '1-D DP', x: 95, y: 110, status: 'locked' },
-  { id: 'intervals', label: 'Intervals', x: 15, y: 130, status: 'locked' },
-  { id: 'greedy', label: 'Greedy', x: 35, y: 130, status: 'locked' },
-  { id: 'advanced-graphs', label: 'Advanced Graphs', x: 55, y: 130, status: 'locked' },
-  { id: '2d-dp', label: '2-D DP', x: 80, y: 130, status: 'locked' },
-  { id: 'bit-manip', label: 'Bit Manipulation', x: 105, y: 130, status: 'locked' },
-  { id: 'math', label: 'Math & Geometry', x: 90, y: 150, status: 'locked' },
+  { id: 'two-pointers', label: 'Two Pointers', x: 30, y: 30, status: 'completed' },
+  { id: 'stack', label: 'Stack', x: 70, y: 30, status: 'completed' },
+  { id: 'binary-search', label: 'Binary Search', x: 20, y: 50, status: 'completed' },
+  { id: 'sliding-window', label: 'Sliding Window', x: 40, y: 50, status: 'completed' },
+  { id: 'linked-list', label: 'Linked List', x: 80, y: 50, status: 'completed' },
+  { id: 'trees', label: 'Trees', x: 50, y: 70, status: 'completed' },
+  { id: 'tries', label: 'Tries', x: 20, y: 90, status: 'completed' },
+  { id: 'backtracking', label: 'Backtracking', x: 80, y: 90, status: 'completed' },
+  { id: 'heap', label: 'Heap / Priority Queue', x: 35, y: 110, status: 'completed' },
+  { id: 'graphs', label: 'Graphs', x: 65, y: 110, status: 'completed' },
+  { id: '1d-dp', label: '1-D DP', x: 95, y: 110, status: 'completed' },
+  { id: 'intervals', label: 'Intervals', x: 15, y: 130, status: 'completed' },
+  { id: 'greedy', label: 'Greedy', x: 35, y: 130, status: 'completed' },
+  { id: 'advanced-graphs', label: 'Advanced Graphs', x: 55, y: 130, status: 'completed' },
+  { id: '2d-dp', label: '2-D DP', x: 80, y: 130, status: 'completed' },
+  { id: 'bit-manip', label: 'Bit Manipulation', x: 105, y: 130, status: 'completed' },
+  { id: 'math', label: 'Math & Geometry', x: 90, y: 150, status: 'completed' },
 ];
 
 const connections = [
@@ -98,21 +98,8 @@ const RoadmapPage = () => {
                 </div>
                 <h1 className="text-3xl md:text-5xl font-extrabold text-white mb-4 drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]">Master the Machine</h1>
                 <p className="text-gray-400 max-w-2xl text-xs md:text-sm leading-relaxed px-4">
-                    Follow the sequential execution path below to conquer fundamental algorithms and data structures. Green signifies complete mastery. Yellow indicates active execution.
+                    Follow the sequential execution path below to conquer fundamental algorithms and data structures.
                 </p>
-            </div>
-
-            {/* Legend */}
-            <div className="absolute top-4 right-4 md:top-10 md:right-10 flex flex-col gap-2 border border-[#07fc03]/20 bg-black/80 backdrop-blur p-3 md:p-4 rounded-xl z-20 shadow-[0_0_15px_rgba(7,252,3,0.05)] text-[10px] md:text-xs">
-                <div className="flex items-center gap-2 md:gap-3 text-gray-400 font-bold uppercase tracking-wider hover:text-[#07fc03] transition-colors cursor-default">
-                    <div className="w-2.5 h-2.5 rounded bg-[#07fc03]/20 border border-[#07fc03] shadow-[0_0_5px_#07fc03]"></div> MASTERED
-                </div>
-                <div className="flex items-center gap-2 md:gap-3 text-gray-400 font-bold uppercase tracking-wider hover:text-yellow-400 transition-colors cursor-default">
-                    <div className="w-2.5 h-2.5 rounded bg-yellow-400/20 border border-yellow-400 shadow-[0_0_5px_#facc15]"></div> IN PROGRESS
-                </div>
-                <div className="flex items-center gap-2 md:gap-3 text-gray-400 font-bold uppercase tracking-wider hover:text-gray-300 transition-colors cursor-default">
-                    <div className="w-2.5 h-2.5 rounded bg-gray-900 border border-gray-700"></div> LOCKED
-                </div>
             </div>
 
             {/* Interactive Graph Area */}

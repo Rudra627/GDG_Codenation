@@ -196,7 +196,7 @@ const HomePage = () => {
                             </div>
                             <span className="text-[#07fc03] text-xl font-bold tracking-tight">CodeNation</span>
                         </div>
-                        <p className="text-gray-500 text-xs tracking-widest uppercase">Powered by GDG GIETU</p>
+                        <p className="text-gray-500 text-xs tracking-widest uppercase">Devloped by Google Devloper Group of GIET University</p>
                     </div>
 
                     {/* Contact Info */}
@@ -208,7 +208,7 @@ const HomePage = () => {
                         </div>
                         <div className="flex items-center space-x-3 text-gray-400 hover:text-white smooth-transition text-sm">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#07fc03]"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                            <span>Primary Server: GIETU Campus</span>
+                            <span>Primary Server: GIET University Gunupur</span>
                         </div>
                     </div>
                 </div>
