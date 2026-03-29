@@ -37,39 +37,42 @@ const ContestsPage = () => {
     const past = contests.filter(c => new Date(c.end_time) <= now);
 
     const ContestCard = ({ contest, status }) => {
-        let statusColor = "text-gray-500";
-        let statusBorder = "border-gray-800";
+        let statusColor = "text-zinc-500";
+        let statusBorder = "border-zinc-800";
+        let statusBg = "bg-zinc-500/10";
         if (status === 'active') {
-             statusColor = "text-red-500 animate-pulse";
-             statusBorder = "border-red-500/30";
+             statusColor = "text-red-400 animate-pulse";
+             statusBorder = "border-red-500/20";
+             statusBg = "bg-red-500/10";
         } else if (status === 'upcoming') {
-             statusColor = "text-[#07fc03]";
-             statusBorder = "border-[#07fc03]/30";
+             statusColor = "text-white";
+             statusBorder = "border-white/20";
+             statusBg = "bg-white/10";
         }
 
         return (
-            <div className={`bg-[#0a0a0a] border ${statusBorder} rounded-xl p-6 hover:shadow-[0_0_15px_rgba(7,252,3,0.1)] smooth-transition relative group`}>
+            <div className={`bg-[#111113] border border-white/[0.06] rounded-2xl p-6 hover:border-white/15 transition-all duration-300 card-hover relative group`}>
                 <div className="flex justify-between items-start mb-4">
-                    <h3 className="text-xl font-bold text-white group-hover:text-[#07fc03] transition-colors">
+                    <h3 className="text-lg font-semibold text-white group-hover:text-white transition-colors">
                         <Link to={`/contests/${contest.id}`}>{contest.title}</Link>
                     </h3>
-                    <span className={`text-xs font-mono uppercase tracking-widest px-3 py-1 bg-black rounded-full border ${statusBorder} ${statusColor}`}>
+                    <span className={`text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full border ${statusBorder} ${statusColor} ${statusBg}`}>
                         {status}
                     </span>
                 </div>
-                <p className="text-gray-400 text-sm mb-6 line-clamp-2">{contest.description}</p>
-                <div className="flex items-center text-sm text-gray-500 space-x-6 font-mono">
-                    <div className="flex items-center space-x-2">
-                        <Clock size={16} className="text-[#07fc03]/50" />
+                <p className="text-zinc-500 text-sm mb-6 line-clamp-2">{contest.description}</p>
+                <div className="flex items-center text-sm text-zinc-500 gap-5">
+                    <div className="flex items-center gap-2">
+                        <Clock size={14} className="text-zinc-600" />
                         <span>{new Date(contest.start_time).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
                     </div>
-                    <div className="flex items-center space-x-2">
-                        <Users size={16} className="text-[#07fc03]/50" />
-                        <span>{contest.participants_count || 0} Registered</span>
+                    <div className="flex items-center gap-2">
+                        <Users size={14} className="text-zinc-600" />
+                        <span>{contest.participants_count || 0}</span>
                     </div>
                 </div>
                 <div className="mt-6">
-                     <Link to={`/contests/${contest.id}`} className="block w-full text-center bg-gray-900 hover:bg-[#07fc03]/10 text-[#07fc03] border border-[#07fc03]/30 uppercase tracking-widest text-xs py-2 rounded-lg smooth-transition font-bold">
+                     <Link to={`/contests/${contest.id}`} className="block w-full text-center bg-white/[0.03] hover:bg-white/10 text-white border border-white/[0.06] hover:border-white/20 text-sm py-2.5 rounded-xl transition-all duration-200 font-medium">
                         {status === 'past' ? 'View Results' : 'Enter Arena'}
                      </Link>
                 </div>
@@ -78,29 +81,29 @@ const ContestsPage = () => {
     };
 
     return (
-        <div className="flex-grow flex flex-col items-center bg-black relative p-6 pt-12 md:p-12 font-mono min-h-screen">
+        <div className="flex-grow flex flex-col items-center bg-[#09090B] relative p-6 pt-12 md:p-12 min-h-screen">
             <div className="w-full max-w-6xl relative z-10">
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10 border-b border-[#07fc03]/30 pb-6">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10 border-b border-white/[0.06] pb-6">
                     <div>
-                        <h1 className="text-3xl md:text-5xl font-bold text-white flex items-center gap-4 uppercase tracking-tight">
-                            <Trophy className="text-[#07fc03]" size={40} />
-                            CodeNation Contests
+                        <h1 className="text-3xl md:text-4xl font-bold text-white flex items-center gap-3">
+                            <Trophy className="text-white" size={32} />
+                            Contests
                         </h1>
-                        <p className="text-gray-400 mt-2 tracking-widest uppercase text-xs">Compete. Rank Up. Dominate.</p>
+                        <p className="text-zinc-500 mt-2 text-sm">Compete. Rank Up. Dominate.</p>
                     </div>
                     {user && user.role === 'Admin' && (
-                        <Link to="/contests/create" className="flex items-center gap-2 bg-[#07fc03] hover:bg-[#00cc00] text-black font-bold px-6 py-2 rounded-lg shadow-[0_0_15px_rgba(7,252,3,0.3)] smooth-transition uppercase text-sm tracking-widest">
-                            <Plus size={18} /> Create
+                        <Link to="/contests/create" className="flex items-center gap-2 bg-white hover:bg-[#00e085] text-[#09090B] font-semibold px-5 py-2.5 rounded-lg shadow-[0_0_16px_rgba(255,255,255,0.15)] transition-all duration-200 text-sm">
+                            <Plus size={16} /> Create Contest
                         </Link>
                     )}
                 </div>
 
                 {active.length > 0 && (
                     <div className="mb-12">
-                        <h2 className="text-xl font-bold text-red-500 flex items-center gap-2 mb-6 uppercase tracking-widest">
-                            <PlayCircle size={20} /> Active Now
+                        <h2 className="text-lg font-semibold text-red-400 flex items-center gap-2 mb-6">
+                            <PlayCircle size={18} /> Active Now
                         </h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                             {active.map(c => <ContestCard key={c.id} contest={c} status="active" />)}
                         </div>
                     </div>
@@ -108,20 +111,20 @@ const ContestsPage = () => {
 
                 {upcoming.length > 0 && (
                     <div className="mb-12">
-                        <h2 className="text-xl font-bold text-[#07fc03] flex items-center gap-2 mb-6 uppercase tracking-widest">
-                            <Clock size={20} /> Upcoming
+                        <h2 className="text-lg font-semibold text-white flex items-center gap-2 mb-6">
+                            <Clock size={18} /> Upcoming
                         </h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                             {upcoming.map(c => <ContestCard key={c.id} contest={c} status="upcoming" />)}
                         </div>
                     </div>
                 )}
 
                 <div className="mb-12">
-                    <h2 className="text-xl font-bold text-gray-500 mb-6 uppercase tracking-widest">Past Contests</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <h2 className="text-lg font-semibold text-zinc-400 mb-6">Past Contests</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                         {past.map(c => <ContestCard key={c.id} contest={c} status="past" />)}
-                        {past.length === 0 && <p className="text-gray-600 italic">No past contests found.</p>}
+                        {past.length === 0 && <p className="text-zinc-600 italic">No past contests found.</p>}
                     </div>
                 </div>
             </div>

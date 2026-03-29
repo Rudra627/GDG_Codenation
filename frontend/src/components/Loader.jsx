@@ -1,36 +1,24 @@
 import { useEffect, useState } from 'react';
 
 const Loader = ({ onComplete }) => {
-    const [progress, setProgress] = useState(0);
+    const [visible, setVisible] = useState(true);
 
     useEffect(() => {
-        const interval = setInterval(() => {
-            setProgress((prev) => {
-                if (prev >= 100) {
-                    clearInterval(interval);
-                    setTimeout(() => onComplete(), 400); 
-                }
+        const timer = setTimeout(() => {
+            setVisible(false);
+            if (onComplete) {
+                setTimeout(() => onComplete(), 300);
+            }
+        }, 1200);
 
-                return Math.min(prev + Math.floor(Math.random() * 6) + 2, 100);
-
-            });
-        }, 80); 
-
-        return () => clearInterval(interval);
+        return () => clearTimeout(timer);
     }, [onComplete]);
 
     return (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black font-mono overflow-hidden">
-            <div className="w-full max-w-xl text-[#07fc03] px-8 tracking-widest text-lg flex flex-col items-center">
-                <div className="mb-4">
-                    Loading {progress}%
-                </div>
-                <div className="w-full h-1 bg-black border border-[#07fc03]/30 glow">
-                    <div 
-                        className="h-full bg-[#07fc03] transition-all duration-75 ease-linear shadow-[0_0_10px_#07fc03]"
-                        style={{ width: `${progress}%` }}
-                    />
-                </div>
+        <div className={`fixed inset-0 z-50 flex items-center justify-center bg-[#09090B] transition-opacity duration-300 ${visible ? 'opacity-100' : 'opacity-0'}`}>
+            <div className="relative w-12 h-12">
+                <div className="absolute inset-0 rounded-full border-2 border-zinc-800" />
+                <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-[#ffffff] animate-spin" />
             </div>
         </div>
     );

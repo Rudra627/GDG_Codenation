@@ -18,6 +18,7 @@ const Register = () => {
         setError('');
         try {
             await register(formData.name, formData.email, formData.password);
+            
             setShowLoader(true);
         } catch (err) {
             setError(err.response?.data?.message || 'Registration failed');

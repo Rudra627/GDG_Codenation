@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { Play, CheckCircle, Star, Search, Tag } from 'lucide-react';
+import { Play, CheckCircle, Search, Star, Tag } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 
 const ProblemsPage = () => {
@@ -22,7 +22,6 @@ const ProblemsPage = () => {
                 setProblems(res.data);
             } catch (error) {
                 console.error("Error fetching problems", error);
-                // Fallback to public list if authenticated fails somehow
                 try {
                      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/problems`);
                      setProblems(res.data);
@@ -38,7 +37,7 @@ const ProblemsPage = () => {
         if (problems.length > 0) {
             const allTopics = new Set();
             problems.forEach(p => {
-                if (p.topics) {
+                if (p.topics && typeof p.topics === 'string') {
                     p.topics.split(',').forEach(t => allTopics.add(t.trim()));
                 }
             });
@@ -54,44 +53,44 @@ const ProblemsPage = () => {
 
     const getDifficultyColor = (difficulty) => {
         switch(difficulty) {
-            case 'Easy': return 'text-green-400 bg-green-400/10 border-green-400/20';
-            case 'Medium': return 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20';
-            case 'Hard': return 'text-red-400 bg-red-400/10 border-red-400/20';
-            default: return 'text-gray-400 bg-gray-400/10 border-gray-400/20';
+            case 'Easy': return 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20';
+            case 'Medium': return 'text-amber-500 bg-amber-500/10 border-amber-500/20';
+            case 'Hard': return 'text-red-500 bg-red-500/10 border-red-500/20';
+            default: return 'text-zinc-400 bg-zinc-400/10 border-zinc-400/20';
         }
     };
 
     return (
-        <div className="flex-grow flex flex-col items-center py-12 px-6">
-            <div className="text-center max-w-3xl mb-8">
-                <h1 className="text-4xl font-extrabold mb-4 text-[#07fc03]">
-                    Problem Playground
+        <div className="flex-grow flex flex-col items-center py-16 px-6 bg-[var(--bg-primary)]">
+            <div className="text-center max-w-2xl mb-12">
+                <h1 className="text-4xl md:text-5xl font-extrabold mb-4 text-white tracking-tight">
+                    Problem <span className="text-[var(--accent)]">Playground</span>
                 </h1>
-                <p className="text-lg text-gray-400">
-                    Select a challenge below and test your skills in our collaborative editor.
+                <p className="text-lg text-zinc-400">
+                    Select a challenge below and test your skills in our futuristic editor environment.
                 </p>
             </div>
 
-            {/* Filters Section */}
-            <div className="w-full max-w-5xl mx-auto mb-8 flex flex-col md:flex-row gap-4">
-                <div className="glass p-4 rounded-xl flex-grow md:w-1/3 flex items-center border border-[#07fc03]/20">
-                    <Search size={18} className="text-[#07fc03] mr-3" />
+            {/* Filters */}
+            <div className="w-full max-w-4xl mx-auto mb-10 flex flex-col md:flex-row gap-4">
+                <div className="bg-[var(--bg-secondary)] p-4 rounded-xl flex-grow md:w-1/3 flex items-center border border-white/[0.04] shadow-[0_0_15px_rgba(255,42,42,0.05)] focus-within:shadow-[0_0_20px_rgba(255,42,42,0.15)] transition-shadow">
+                    <Search size={18} className="text-zinc-500 mr-3" />
                     <input 
                         type="text"
-                        placeholder="Search challenges..."
+                        placeholder="Search problems..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full bg-transparent border-none text-white focus:outline-none"
+                        className="w-full bg-transparent border-none text-white focus:outline-none placeholder-zinc-600"
                     />
                 </div>
-                <div className="glass p-4 rounded-xl flex-grow md:w-2/3 border border-[#07fc03]/20 flex flex-wrap items-center gap-2">
-                    <Tag size={18} className="text-[#07fc03] mr-2 shrink-0" />
+                <div className="bg-[var(--bg-secondary)] p-4 rounded-xl flex-grow md:w-2/3 border border-white/[0.04] flex flex-wrap items-center gap-2 overflow-x-auto">
+                    <Tag size={18} className="text-[var(--accent)] mr-2 shrink-0" />
                     <button
                         onClick={() => setSelectedTopic('')}
-                        className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-300 ${
+                        className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all duration-200 whitespace-nowrap ${
                             selectedTopic === '' 
-                            ? 'bg-[#07fc03] text-black shadow-[0_0_10px_rgba(7,252,3,0.3)]' 
-                            : 'bg-gray-800 text-gray-400 hover:bg-gray-700 border border-gray-700'
+                            ? 'bg-[var(--accent)] text-white shadow-[0_0_10px_rgba(255,42,42,0.4)]' 
+                            : 'bg-zinc-900 text-zinc-400 hover:text-white border border-white/[0.04]'
                         }`}
                     >
                         All Topics
@@ -100,10 +99,10 @@ const ProblemsPage = () => {
                         <button
                             key={topic}
                             onClick={() => setSelectedTopic(topic)}
-                            className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-300 ${
+                            className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all duration-200 whitespace-nowrap ${
                                 selectedTopic === topic 
-                                ? 'bg-[#07fc03] text-black shadow-[0_0_10px_rgba(7,252,3,0.3)]' 
-                                : 'bg-gray-800 text-gray-400 hover:bg-gray-700 border border-gray-700'
+                                ? 'bg-[var(--accent)] text-white shadow-[0_0_10px_rgba(255,42,42,0.4)]' 
+                                : 'bg-zinc-900 text-zinc-400 hover:text-white border border-white/[0.04]'
                             }`}
                         >
                             {topic}
@@ -112,51 +111,53 @@ const ProblemsPage = () => {
                 </div>
             </div>
 
-            <div className="w-full max-w-5xl mx-auto overflow-x-auto pb-4">
-                <div className="glass rounded-xl overflow-hidden min-w-[700px]">
-                    <div className="grid grid-cols-12 gap-4 border-b border-gray-700 bg-gray-800/50 p-4 font-semibold text-gray-300">
+            <div className="w-full max-w-4xl mx-auto pb-10">
+                <div className="bg-[var(--bg-secondary)] rounded-2xl overflow-hidden min-w-[300px] border border-white/[0.04] shadow-2xl">
+                    <div className="hidden md:grid grid-cols-12 gap-4 border-b border-white/[0.04] bg-white/[0.02] p-5 font-semibold text-zinc-400 text-xs tracking-wider uppercase">
                         <div className="col-span-1 text-center">Status</div>
-                        <div className="col-span-6 pl-4">Title</div>
+                        <div className="col-span-6 pl-2">Title</div>
                         <div className="col-span-3 text-center">Difficulty</div>
                         <div className="col-span-2 text-center">Action</div>
                     </div>
                     
                     {loading ? (
-                        <div className="p-8 text-center text-gray-400 animate-pulse">Loading problems...</div>
+                        <div className="p-12 text-center text-zinc-500">
+                            <div className="inline-block w-8 h-8 border-2 border-zinc-800 border-t-[var(--accent)] rounded-full animate-spin shadow-[0_0_15px_rgba(255,42,42,0.5)]" />
+                        </div>
                     ) : filteredProblems.length === 0 ? (
-                        <div className="p-8 text-center text-gray-400">No problems found matching your criteria.</div>
+                        <div className="p-12 text-center text-zinc-500">No problems found matching your criteria.</div>
                     ) : (
-                        <div className="divide-y divide-gray-700/50">
+                        <div className="divide-y divide-white/[0.04]">
                             {filteredProblems.map((prob) => (
                                 <Link 
                                     to={`/problem/${prob.id}`} 
                                     key={prob.id}
-                                    className={`grid grid-cols-12 gap-4 p-4 items-center hover:bg-gray-700/30 smooth-transition group ${prob.is_daily ? 'bg-[#07fc03]/5' : ''}`}
+                                    className={`flex flex-col md:grid md:grid-cols-12 gap-4 p-5 items-center hover:bg-white/[0.02] transition-colors duration-200 group ${prob.is_daily ? 'bg-[var(--accent)]/[0.02]' : ''}`}
                                 >
-                                    <div className="col-span-1 flex justify-center text-gray-500">
+                                    <div className="col-span-1 flex justify-center w-full md:w-auto mb-2 md:mb-0">
                                         {prob.is_solved ? (
-                                            <CheckCircle className="text-green-500" size={20} />
+                                            <CheckCircle className="text-emerald-500" size={22} />
                                         ) : (
-                                            <div className="w-5 h-5 rounded-full border-2 border-gray-600"></div>
+                                            <div className="w-5 h-5 rounded-full border-2 border-zinc-700 group-hover:border-zinc-500 transition-colors" />
                                         )}
                                     </div>
-                                    <div className="col-span-6 pl-4 font-medium text-gray-200 group-hover:text-[#07fc03] smooth-transition flex items-center space-x-2">
-                                        <span>{prob.title}</span>
+                                    <div className="col-span-6 md:pl-2 font-bold text-zinc-300 group-hover:text-white transition-colors flex items-center justify-center md:justify-start gap-2 w-full md:w-auto text-center md:text-left mb-3 md:mb-0">
+                                        <span className="text-[15px]">{prob.title}</span>
                                         {prob.is_daily && (
-                                            <span className="flex items-center space-x-1 text-xs bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 px-2 py-0.5 rounded-full">
+                                            <span className="flex items-center gap-1 text-[10px] bg-amber-500/10 text-amber-500 border border-amber-500/20 px-2 py-0.5 rounded-full">
                                                 <Star size={10} fill="currentColor" />
                                                 <span>Daily</span>
                                             </span>
                                         )}
                                     </div>
-                                    <div className="col-span-3 flex justify-center">
-                                        <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getDifficultyColor(prob.difficulty)}`}>
+                                    <div className="col-span-3 flex justify-center w-full md:w-auto mb-4 md:mb-0">
+                                        <span className={`px-3 py-1 rounded-md text-[11px] font-bold border ${getDifficultyColor(prob.difficulty)}`}>
                                             {prob.difficulty}
                                         </span>
                                     </div>
-                                    <div className="col-span-2 flex justify-center">
-                                        <button className="flex items-center space-x-1 text-sm bg-[#07fc03]/20 text-[#07fc03] hover:bg-[#07fc03] hover:text-black px-3 py-1.5 rounded-md smooth-transition">
-                                            <Play size={14} />
+                                    <div className="col-span-2 flex justify-center w-full md:w-auto">
+                                        <button className="flex items-center gap-2 text-sm bg-zinc-900 border border-white/[0.08] text-white group-hover:border-[var(--accent)] group-hover:text-[var(--accent)] group-hover:shadow-[0_0_15px_rgba(255,42,42,0.2)] px-4 py-2 rounded-full font-bold transition-all duration-300">
+                                            <Play size={14} className="group-hover:fill-[var(--accent)]" />
                                             <span>Solve</span>
                                         </button>
                                     </div>

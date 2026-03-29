@@ -37,7 +37,7 @@ const VERDICT = {
     'System Error':        { color: '#94a3b8', bg: '#0f172a', border: '#334155', Icon: AlertTriangle },
 };
 
-const Spinner = ({ color = '#07fc03', size = 14 }) => (
+const Spinner = ({ color = '#ffffff', size = 14 }) => (
     <span style={{
         display: 'inline-block', width: size, height: size, borderRadius: '50%',
         border: `2px solid ${color}30`, borderTopColor: color, animation: 'spin 0.7s linear infinite',
@@ -53,7 +53,7 @@ const TestResultPanel = ({ result, mode, isLoading }) => {
             {/* Loading */}
             {isLoading && (
                 <div className="flex items-center gap-3 text-gray-400">
-                    <Spinner color="#07fc03" size={16} />
+                    <Spinner color="#ffffff" size={16} />
                     <span className="text-sm">Running your code...</span>
                 </div>
             )}
@@ -126,7 +126,7 @@ const TestResultPanel = ({ result, mode, isLoading }) => {
                                     </pre>
                                 </div>
                                 <div>
-                                    <p className="text-[10px] uppercase tracking-widest font-semibold mb-1 text-green-400">Expected Output</p>
+                                    <p className="text-[10px] uppercase tracking-widest font-semibold mb-1 text-zinc-400">Expected Output</p>
                                     <pre className="text-xs rounded-md px-3 py-2 min-h-[36px]"
                                          style={{ background: '#001a00', border: '1px solid #166534', color: '#86efac', fontFamily: 'monospace' }}>
                                         {result.expectedOutput ?? '(empty)'}
@@ -146,8 +146,8 @@ const TestResultPanel = ({ result, mode, isLoading }) => {
                     {/* Accepted */}
                     {result.status === 'Accepted' && (
                         <div className="flex items-center gap-2">
-                            <CheckCircle2 size={15} className="text-green-400 shrink-0" />
-                            <p className="text-sm text-green-300">
+                            <CheckCircle2 size={15} className="text-zinc-400 shrink-0" />
+                            <p className="text-sm text-zinc-300">
                                 {mode === 'submit'
                                     ? '🎉 All test cases passed! Submission saved.'
                                     : 'Sample tests passed! Click Submit to run all hidden test cases.'}
@@ -325,27 +325,27 @@ const ProblemDetail = () => {
     const langConfig = LANGUAGES.find(l => l.id === language) || LANGUAGES[0];
 
     if (loading) return (
-        <div className="flex-grow flex items-center justify-center bg-[#1a1a1a]">
+        <div className="flex-grow flex items-center justify-center bg-[#09090B]">
             <div className="flex flex-col items-center gap-3">
-                <Spinner color="#07fc03" size={28} />
+                <Spinner color="#ffffff" size={28} />
                 <p className="text-gray-400 text-sm">Loading problem...</p>
             </div>
         </div>
     );
     if (!problem) return (
-        <div className="flex-grow flex items-center justify-center bg-[#1a1a1a]">
+        <div className="flex-grow flex items-center justify-center bg-[#09090B]">
             <p className="text-red-400 text-sm">Problem not found.</p>
         </div>
     );
 
     /* ── Left Pane (Description Only) ─────────────────────────────────────────── */
     const DescPane = (
-        <div className="h-full flex flex-col overflow-hidden" style={{ background: '#1a1a1a' }}>
+        <div className="h-full flex flex-col overflow-hidden" style={{ background: '#09090B' }}>
             {/* Header Tabs */}
             <div className="px-2 py-2 shrink-0 flex flex-nowrap items-center gap-1 overflow-x-auto custom-scrollbar"
-                 style={{ background: '#262626', borderBottom: '1px solid #333' }}>
+                 style={{ background: '#111113', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                 <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap"
-                        style={{ color: '#07fc03', background: '#333' }}>
+                        style={{ color: '#ffffff', background: '#1c1c1e' }}>
                     <FileText size={13} /> Description
                 </button>
             </div>
@@ -357,7 +357,7 @@ const ProblemDetail = () => {
                                 {problem.id}. {problem.title}
                             </h1>
                             <span className={`mt-0.5 px-2 py-0.5 text-xs font-bold rounded shrink-0
-                                ${problem.difficulty === 'Easy'   ? 'text-green-300  bg-green-900/50'  :
+                                ${problem.difficulty === 'Easy'   ? 'text-zinc-300  bg-white/10'  :
                                   problem.difficulty === 'Medium' ? 'text-yellow-300 bg-yellow-900/50' :
                                                                     'text-red-300    bg-red-900/50'}`}>
                                 {problem.difficulty}
@@ -375,7 +375,7 @@ const ProblemDetail = () => {
                                 <div className="flex flex-wrap gap-1.5 mb-4">
                                     {topicsArr.map(t => (
                                         <span key={t} className="px-2 py-0.5 text-[11px] rounded"
-                                              style={{ background: '#2a2a2a', border: '1px solid #444', color: '#aaa' }}>
+                                              style={{ background: '#111113', border: '1px solid rgba(255,255,255,0.08)', color: '#a1a1aa' }}>
                                             {t}
                                         </span>
                                     ))}
@@ -391,12 +391,12 @@ const ProblemDetail = () => {
                         {/* Sample Test Cases Header */}
                         {sampleCases.length > 0 && (
                             <div className="space-y-4">
-                                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-[#333] pb-2">Examples</h3>
+                                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-white/[0.06] pb-2">Examples</h3>
                                 {sampleCases.map((tc, idx) => (
                                     <div key={tc.id}
-                                         style={{ background: '#212121', border: '1px solid #333', borderRadius: '8px', overflow: 'hidden' }}>
+                                         style={{ background: '#111113', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '8px', overflow: 'hidden' }}>
                                         <div className="px-3 py-1.5 text-xs font-bold"
-                                             style={{ background: '#2a2a2a', borderBottom: '1px solid #333', color: '#aaa', letterSpacing: '0.05em' }}>
+                                             style={{ background: '#1c1c1e', borderBottom: '1px solid rgba(255,255,255,0.06)', color: '#a1a1aa', letterSpacing: '0.05em' }}>
                                             Test Case {idx + 1}
                                         </div>
                                         <div className="p-3 space-y-2">
@@ -425,25 +425,25 @@ const ProblemDetail = () => {
 
     /* ── Editor + Bottom panel ─────────────────────────────────────── */
     const EditorPane = (
-        <div className="h-full flex flex-col overflow-hidden" style={{ background: '#1e1e1e' }}>
+        <div className="h-full flex flex-col overflow-hidden" style={{ background: '#111113' }}>
             {/* Top toolbar: language select + reset */}
             <div className="flex items-center justify-between px-3 py-2 shrink-0"
-                 style={{ background: '#2d2d2d', borderBottom: '1px solid #3a3a3a' }}>
+                 style={{ background: '#1c1c1e', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                 <div className="flex items-center gap-2">
-                    <Code2 size={13} style={{ color: '#07fc03' }} />
+                    <Code2 size={13} style={{ color: '#ffffff' }} />
                     <select
                         value={language}
                         onChange={e => changeLang(e.target.value)}
                         disabled={isBusy}
                         className="text-xs px-2 py-1 rounded outline-none cursor-pointer disabled:opacity-40"
-                        style={{ background: '#3c3c3c', color: '#ddd', border: '1px solid #555' }}
+                        style={{ background: '#1c1c1e', color: '#ddd', border: '1px solid rgba(255,255,255,0.1)' }}
                     >
                     {LANGUAGES.map(l => <option key={l.id} value={l.id}>{l.label}</option>)}
                     </select>
                     {/* Template mode badge */}
                     {hasTemplate && (
                         <span className="text-[10px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider"
-                              style={{ background: '#07fc0320', color: '#07fc03', border: '1px solid #07fc0340' }}>
+                              style={{ background: 'rgba(255,255,255,0.1)', color: '#ffffff', border: '1px solid rgba(255,255,255,0.25)' }}>
                             ƒ Function Mode
                         </span>
                     )}
@@ -452,7 +452,7 @@ const ProblemDetail = () => {
                 {/* Problem title shown inline in fullscreen — no overlap */}
                 {fullscreen && (
                     <span className="hidden lg:block text-xs font-semibold truncate max-w-[240px] px-2"
-                          style={{ color: '#07fc03', opacity: 0.85 }}>
+                          style={{ color: '#ffffff', opacity: 0.85 }}>
                         {problem?.id}. {problem?.title}
                     </span>
                 )}
@@ -463,20 +463,20 @@ const ProblemDetail = () => {
                             <button
                                 onClick={handleRun}
                                 disabled={isBusy}
-                                className="flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-[4px] text-[12px] font-semibold hover:bg-[#4a4a4a] transition-all disabled:opacity-50"
-                                style={{ background: '#333', color: '#e5e5e5', border: '1px solid #4d4d4d' }}
+                                className="flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-lg text-[12px] font-semibold hover:bg-[#facc15]/20 transition-all disabled:opacity-50"
+                                style={{ background: 'rgba(250,204,21,0.1)', color: '#facc15', border: '1px solid rgba(250,204,21,0.25)' }}
                             >
-                                {running ? <Spinner color="#fff" size={11} /> : <><Play size={11} fill="#e5e5e5"/> Run</>}
+                                {running ? <Spinner color="#facc15" size={11} /> : <><Play size={11} fill="#facc15"/> Run</>}
                             </button>
                             <button
                                 onClick={handleSubmit}
                                 disabled={isBusy}
-                                className="flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-[4px] text-[12px] font-semibold transition-all hover:bg-[#00e600] disabled:opacity-50"
-                                style={{ background: '#00ff00', color: '#000' }}
+                                className="flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-lg text-[12px] font-semibold transition-all hover:bg-[#00cc7a] disabled:opacity-50"
+                                style={{ background: '#00FF94', color: '#09090B' }}
                             >
                                 {submitting ? <Spinner color="#003300" size={11} /> : <><Send size={11} /> Submit</>}
                             </button>
-                            <div className="w-[1px] h-[16px] bg-[#444] mx-1"></div>
+                            <div className="w-[1px] h-[16px] bg-white/10 mx-1"></div>
                         </div>
                     )}
                     
@@ -504,7 +504,7 @@ const ProblemDetail = () => {
 
             {fullscreen ? (
                 /* Fullscreen View: Just the editor */
-                <div className="flex-1 min-h-0 flex flex-col pt-1" style={{ background: '#1e1e1e' }}>
+                <div className="flex-1 min-h-0 flex flex-col pt-1" style={{ background: '#111113' }}>
                     <Editor
                         height="100%"
                         language={langConfig.mono}
@@ -539,7 +539,7 @@ const ProblemDetail = () => {
                     style={{ display: 'flex' }}
                 >
                     {/* Monaco editor top half */}
-                    <div className="min-h-0 flex flex-col pt-1" style={{ background: '#1e1e1e' }}>
+                    <div className="min-h-0 flex flex-col pt-1" style={{ background: '#111113' }}>
                         <Editor
                             height="100%"
                             language={langConfig.mono}
@@ -561,15 +561,15 @@ const ProblemDetail = () => {
                     </div>
 
                 {/* Bottom Testcase panel half */}
-                <div className="flex flex-col min-h-0" style={{ background: '#1e1e1e' }}>
+                <div className="flex flex-col min-h-0" style={{ background: '#111113' }}>
                     
                     {/* Console & Action Bar (Middle Splitter) */}
-                    <div className="shrink-0 flex items-center justify-between px-4 py-3" style={{ background: '#262626', borderTop: '1px solid #333', borderBottom: '1px solid #333' }}>
+                    <div className="shrink-0 flex items-center justify-between px-4 py-3" style={{ background: '#0c0c0e', borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                         {/* Ready Status / Left Side */}
                         <div className="flex items-center gap-2">
                             {isBusy ? (
-                                <span className="flex items-center gap-1.5 text-xs text-[#00ff00]">
-                                    <Spinner color="#00ff00" size={12} />
+                                <span className="flex items-center gap-1.5 text-xs text-white">
+                                    <Spinner color="#ffffff" size={12} />
                                     {running ? 'Running...' : 'Submitting...'}
                                 </span>
                             ) : (
@@ -582,16 +582,16 @@ const ProblemDetail = () => {
                             <button
                                 onClick={handleRun}
                                 disabled={isBusy}
-                                className="flex items-center justify-center gap-1.5 px-5 py-1.5 rounded-[6px] text-[13px] font-semibold hover:bg-[#4a4a4a] transition-all disabled:opacity-50"
-                                style={{ background: '#3b3b3b', color: '#e5e5e5', border: '1px solid #4d4d4d', minWidth: '70px' }}
+                                className="flex items-center justify-center gap-1.5 px-5 py-1.5 rounded-lg text-[13px] font-semibold hover:bg-[#facc15]/20 transition-all disabled:opacity-50"
+                                style={{ background: 'rgba(250,204,21,0.1)', color: '#facc15', border: '1px solid rgba(250,204,21,0.25)', minWidth: '70px' }}
                             >
-                                {running ? <Spinner color="#fff" size={12} /> : <><Play size={12} fill="#e5e5e5"/> Run</>}
+                                {running ? <Spinner color="#facc15" size={12} /> : <><Play size={12} fill="#facc15"/> Run</>}
                             </button>
                             <button
                                 onClick={handleSubmit}
                                 disabled={isBusy}
-                                className="flex items-center justify-center gap-1.5 px-5 py-1.5 rounded-[6px] text-[13px] font-semibold transition-all hover:bg-[#00e600] disabled:opacity-50"
-                                style={{ background: '#00ff00', color: '#000', minWidth: '80px' }}
+                                className="flex items-center justify-center gap-1.5 px-5 py-1.5 rounded-lg text-[13px] font-semibold transition-all hover:bg-[#00cc7a] disabled:opacity-50 shadow-[0_0_16px_rgba(0,255,148,0.15)]"
+                                style={{ background: '#00FF94', color: '#09090B', minWidth: '80px' }}
                             >
                                 {submitting ? <Spinner color="#003300" size={12} /> : <><Send size={12} /> Submit</>}
                             </button>
@@ -599,12 +599,12 @@ const ProblemDetail = () => {
                     </div>
 
                     {/* Tab headers */}
-                    <div className="flex items-center justify-between shrink-0 px-2" style={{ background: '#1e1e1e', height: '40px', borderBottom: '1px solid #333' }}>
+                    <div className="flex items-center justify-between shrink-0 px-2" style={{ background: '#111113', height: '40px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                         <div className="flex items-center h-full gap-1">
                             <button
                                 onClick={() => { setBottomTab('testcase'); setPanelExpanded(true); }}
                                 className="px-3 h-full text-[13px] font-semibold transition-colors flex items-center gap-1.5"
-                                style={{ color: (bottomTab === 'testcase') ? '#00ff00' : '#8c8c8c' }}
+                                style={{ color: (bottomTab === 'testcase') ? '#ffffff' : '#8c8c8c' }}
                             >
                                 Testcase
                             </button>
@@ -632,7 +632,7 @@ const ProblemDetail = () => {
 
                     {/* Tab body (only show if expanded) */}
                     {panelExpanded && (
-                        <div className="flex-1 overflow-hidden flex flex-col" style={{ background: '#1e1e1e' }}>
+                        <div className="flex-1 overflow-hidden flex flex-col" style={{ background: '#111113' }}>
                             {bottomTab === 'testcase' ? (
                                 <div className="flex-1 overflow-y-auto p-4 flex flex-col pt-4">
                                     {/* Testcase Pills */}
@@ -643,7 +643,7 @@ const ProblemDetail = () => {
                                                     onClick={() => setActiveTestCaseTab(idx)}
                                                     className="px-4 py-1.5 rounded-[6px] text-[13px] font-semibold whitespace-nowrap transition-colors"
                                                     style={{
-                                                        background: activeTestCaseTab === idx ? '#333' : 'transparent',
+                                                        background: activeTestCaseTab === idx ? '#1c1c1e' : 'transparent',
                                                         color: activeTestCaseTab === idx ? '#fff' : '#8c8c8c',
                                                     }}
                                                 >
@@ -654,7 +654,7 @@ const ProblemDetail = () => {
                                                 onClick={() => setActiveTestCaseTab(-1)}
                                                 className="px-4 py-1.5 rounded-[6px] text-sm font-semibold whitespace-nowrap transition-colors flex items-center justify-center"
                                                 style={{
-                                                    background: activeTestCaseTab === -1 ? '#333' : 'transparent',
+                                                    background: activeTestCaseTab === -1 ? '#1c1c1e' : 'transparent',
                                                     color: activeTestCaseTab === -1 ? '#00b8a3' : '#8c8c8c',
                                                 }}
                                             >
@@ -671,7 +671,7 @@ const ProblemDetail = () => {
                                                     value={customInputVal}
                                                     onChange={(e) => setCustomInputVal(e.target.value)}
                                                     className="w-full flex-1 min-h-[80px] text-[13px] font-mono rounded-[8px] p-3 outline-none resize-none custom-scrollbar"
-                                                    style={{ background: '#262626', border: '1px solid #333', color: '#e5e5e5' }}
+                                                    style={{ background: '#1c1c1e', border: '1px solid rgba(255,255,255,0.08)', color: '#e5e5e5' }}
                                                     placeholder="Enter your custom stdin inputs perfectly here..."
                                                 />
                                                 <p className="text-[10px] text-gray-500 mt-2">Note: Custom input runs only in "Run" mode. "Submit" tests hidden edge cases.</p>
@@ -689,14 +689,14 @@ const ProblemDetail = () => {
                                                             return (
                                                                 <div key={i}>
                                                                     <p className="text-[12px] font-bold mb-1.5 tracking-wider" style={{ color: '#d4d4d4' }}>{name} =</p>
-                                                                    <div className="px-3.5 py-2.5 rounded-[6px] transition-colors" style={{ background: '#2e2e2e', color: '#e5e5e5', fontFamily: 'monospace', fontSize: '13px' }}>
+                                                                    <div className="px-3.5 py-2.5 rounded-[6px] transition-colors" style={{ background: '#1c1c1e', color: '#e5e5e5', fontFamily: 'monospace', fontSize: '13px' }}>
                                                                         {val}
                                                                     </div>
                                                                 </div>
                                                             );
                                                         }
                                                         return (
-                                                            <div key={i} className="px-3.5 py-2.5 rounded-[6px] transition-colors" style={{ background: '#2e2e2e', color: '#e5e5e5', fontFamily: 'monospace', fontSize: '13px' }}>
+                                                            <div key={i} className="px-3.5 py-2.5 rounded-[6px] transition-colors" style={{ background: '#1c1c1e', color: '#e5e5e5', fontFamily: 'monospace', fontSize: '13px' }}>
                                                                 {line}
                                                             </div>
                                                         );
@@ -704,7 +704,7 @@ const ProblemDetail = () => {
                                                 </div>
                                             ) : (
                                                 <div className="flex items-center gap-2 p-2">
-                                                    <Spinner color="#00ff00" size={14} />
+                                                    <Spinner color="#ffffff" size={14} />
                                                     <span className="text-gray-400 text-xs">Loading test cases...</span>
                                                 </div>
                                             )
@@ -724,16 +724,16 @@ const ProblemDetail = () => {
     );
 
     return (
-        <div className="flex-grow flex flex-col overflow-hidden" style={{ background: '#1a1a1a' }}>
+        <div className="flex-grow flex flex-col overflow-hidden" style={{ background: '#09090B' }}>
             {/* Mobile tab bar */}
-            <div className="flex lg:hidden shrink-0 overflow-x-auto custom-scrollbar" style={{ background: '#222', borderBottom: '1px solid #333' }}>
+            <div className="flex lg:hidden shrink-0 overflow-x-auto custom-scrollbar" style={{ background: '#111113', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                 {[{ key: 'description', label: 'Desc', Icon: FileText },
                   { key: 'code', label: 'Code', Icon: Code2 }].map(({ key, label, Icon }) => (
                     <button key={key} onClick={() => { setMobileTab(key); }}
                             className="flex-1 min-w-[80px] flex items-center justify-center gap-1.5 py-2.5 text-[11px] sm:text-xs font-semibold transition-colors whitespace-nowrap px-2"
                             style={{
-                                color: mobileTab === key ? '#07fc03' : '#666',
-                                borderBottom: mobileTab === key ? '2px solid #07fc03' : '2px solid transparent',
+                                color: mobileTab === key ? '#ffffff' : '#666',
+                                borderBottom: mobileTab === key ? '2px solid #ffffff' : '2px solid transparent',
                             }}>
                         <Icon size={13} />{label}
                     </button>
@@ -768,7 +768,7 @@ const ProblemDetail = () => {
                     {DescPane}
                 </div>
                 {/* Right Pane: Code + Results */}
-                <div className="flex flex-col h-full min-h-0 overflow-hidden" style={{ minWidth: 0, borderLeft: '1px solid #333' }}>
+                <div className="flex flex-col h-full min-h-0 overflow-hidden" style={{ minWidth: 0, borderLeft: '1px solid rgba(255,255,255,0.06)' }}>
                     {EditorPane}
                 </div>
             </Split>
@@ -783,7 +783,7 @@ const ProblemDetail = () => {
                         width: '100vw',
                         height: '100dvh',
                         zIndex: 9999,
-                        background: '#1e1e1e',
+                        background: '#111113',
                     }}
                 >
                     {EditorPane}

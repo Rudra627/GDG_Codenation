@@ -14,6 +14,7 @@ import CreateContestPage from './pages/CreateContestPage';
 import EditContestPage from './pages/EditContestPage';
 import ContestDetailPage from './pages/ContestDetailPage';
 import RoadmapPage from './pages/RoadmapPage';
+import DocumentationPage from './pages/DocumentationPage';
 import Navbar from './components/Navbar';
 import Loader from './components/Loader';
 
@@ -35,13 +36,14 @@ function App() {
 
   return (
     <Router>
-      <div className="min-h-screen flex flex-col">
+      <div className="h-screen flex flex-col overflow-hidden">
         <Navbar />
-        <main className="flex-grow flex flex-col">
+        <main className="flex-grow flex flex-col min-h-0 overflow-auto">
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
             <Route path="/register" element={user ? <Navigate to="/" /> : <Register />} />
+            <Route path="/docs" element={<DocumentationPage />} />
             <Route 
               path="/notes" 
               element={

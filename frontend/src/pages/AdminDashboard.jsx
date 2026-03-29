@@ -380,32 +380,32 @@ const AdminDashboard = () => {
             <div className="flex flex-col sm:flex-row gap-4 mb-8">
                 <button 
                     onClick={() => setActiveTab('problems')}
-                    className={`px-4 py-2 rounded-lg font-semibold smooth-transition ${activeTab === 'problems' ? 'bg-[#07fc03] text-black' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
+                    className={`px-4 py-2 rounded-lg font-semibold smooth-transition ${activeTab === 'problems' ? 'bg-white text-black' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
                 >
                     Manage Problems
                 </button>
                 <button 
                     onClick={() => setActiveTab('submissions')}
-                    className={`px-4 py-2 rounded-lg font-semibold smooth-transition ${activeTab === 'submissions' ? 'bg-[#07fc03] text-black' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
+                    className={`px-4 py-2 rounded-lg font-semibold smooth-transition ${activeTab === 'submissions' ? 'bg-white text-black' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
                 >
                     View All Submissions
                 </button>
                 <button 
                     onClick={() => setActiveTab('notes')}
-                    className={`px-4 py-2 rounded-lg font-semibold smooth-transition ${activeTab === 'notes' ? 'bg-[#07fc03] text-black' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
+                    className={`px-4 py-2 rounded-lg font-semibold smooth-transition ${activeTab === 'notes' ? 'bg-white text-black' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
                 >
                     Manage Notes
                 </button>
                 <button 
                     onClick={() => setActiveTab('users')}
-                    className={`px-4 py-2 rounded-lg font-semibold smooth-transition ${activeTab === 'users' ? 'bg-[#07fc03] text-black' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
+                    className={`px-4 py-2 rounded-lg font-semibold smooth-transition ${activeTab === 'users' ? 'bg-white text-black' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
                 >
                     Manage Users
                 </button>
 
             </div>
 
-            {message && <div className="mb-6 p-4 bg-[#07fc03]/10 border border-[#07fc03]/50 text-[#07fc03] rounded-lg">{message}</div>}
+            {message && <div className="mb-6 p-4 bg-white/10 border border-white/50 text-white rounded-lg">{message}</div>}
 
             {activeTab === 'problems' && (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -420,15 +420,15 @@ const AdminDashboard = () => {
                         <form onSubmit={handleCreateProblem} className="space-y-4">
                             <div>
                                 <label className="block text-sm text-gray-400 mb-1">Title</label>
-                                <input required type="text" className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white focus:border-[#07fc03] focus:outline-none transition-colors" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} />
+                                <input required type="text" className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white focus:border-white focus:outline-none transition-colors" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} />
                             </div>
                             <div>
                                 <label className="block text-sm text-gray-400 mb-1">Topics</label>
-                                <input type="text" className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white focus:border-[#07fc03] focus:outline-none transition-colors" value={formData.topics} onChange={e => setFormData({...formData, topics: e.target.value})} placeholder="e.g. Arrays, Strings, DP" />
+                                <input type="text" className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white focus:border-white focus:outline-none transition-colors" value={formData.topics} onChange={e => setFormData({...formData, topics: e.target.value})} placeholder="e.g. Arrays, Strings, DP" />
                             </div>
                             <div>
                                 <label className="block text-sm text-gray-400 mb-1">Difficulty</label>
-                                <select className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white focus:border-[#07fc03] focus:outline-none transition-colors" value={formData.difficulty} onChange={e => setFormData({...formData, difficulty: e.target.value})}>
+                                <select className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white focus:border-white focus:outline-none transition-colors" value={formData.difficulty} onChange={e => setFormData({...formData, difficulty: e.target.value})}>
                                     <option>Easy</option>
                                     <option>Medium</option>
                                     <option>Hard</option>
@@ -436,10 +436,10 @@ const AdminDashboard = () => {
                             </div>
                             <div>
                                 <label className="block text-sm text-gray-400 mb-1">Description</label>
-                                <textarea required rows="6" className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white focus:border-[#07fc03] focus:outline-none transition-colors custom-scrollbar" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})}></textarea>
+                                <textarea required rows="6" className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white focus:border-white focus:outline-none transition-colors custom-scrollbar" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})}></textarea>
                             </div>
                             <div className="flex space-x-3">
-                                <button type="submit" className="bg-[#07fc03] hover:bg-[#07fc03]/80 text-black px-4 py-2 rounded shadow-lg smooth-transition font-medium">
+                                <button type="submit" className="bg-white hover:bg-white/80 text-black px-4 py-2 rounded shadow-lg smooth-transition font-medium">
                                     {isEditing ? 'Update Problem' : 'Create Problem'}
                                 </button>
                                 {isEditing && (
@@ -474,7 +474,7 @@ const AdminDashboard = () => {
                                 <input type="checkbox" id="hidden" checked={testCaseData.is_hidden} onChange={e => setTestCaseData({...testCaseData, is_hidden: e.target.checked})} />
                                 <label htmlFor="hidden" className="text-sm text-gray-400">Hidden Test Case?</label>
                             </div>
-                            <button type="submit" className="bg-[#07fc03] hover:bg-[#07fc03]/80 text-black px-4 py-2 rounded shadow-lg smooth-transition">Add Test Case</button>
+                            <button type="submit" className="bg-white hover:bg-white/80 text-black px-4 py-2 rounded shadow-lg smooth-transition">Add Test Case</button>
                         </form>
                     </div>
                     {/* Manage Problems List */}
@@ -487,10 +487,10 @@ const AdminDashboard = () => {
                                 problems.map(prob => (
                                      <div key={prob.id} className="bg-gray-800/50 p-4 rounded-lg border border-gray-700 flex justify-between items-center">
                                         <div>
-                                            <h3 className="text-[#07fc03] font-bold">{prob.title}</h3>
+                                            <h3 className="text-white font-bold">{prob.title}</h3>
                                             <div className="flex gap-2 mt-1">
                                                 <span className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded inline-block">{prob.difficulty}</span>
-                                                {prob.topics && <span className="text-xs bg-gray-700 text-[#07fc03] px-2 py-1 rounded inline-block">{prob.topics}</span>}
+                                                {prob.topics && <span className="text-xs bg-gray-700 text-white px-2 py-1 rounded inline-block">{prob.topics}</span>}
                                             </div>
                                         </div>
                                         <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
@@ -555,7 +555,7 @@ const AdminDashboard = () => {
                                             <td className="px-6 py-4">{s.user_name}</td>
                                             <td className="px-6 py-4">{s.problem_title}</td>
                                             <td className="px-6 py-4">{s.language}</td>
-                                            <td className={`px-6 py-4 ${s.status === 'Accepted' ? 'text-green-400' : s.status === 'Pending' ? 'text-yellow-400' : 'text-red-400'}`}>{s.status}</td>
+                                            <td className={`px-6 py-4 ${s.status === 'Accepted' ? 'text-zinc-400' : s.status === 'Pending' ? 'text-yellow-400' : 'text-red-400'}`}>{s.status}</td>
                                             <td className="px-6 py-4 text-gray-500 text-sm">{new Date(s.submitted_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</td>
                                             <td className="px-6 py-4">
                                                 <button 
@@ -568,12 +568,12 @@ const AdminDashboard = () => {
                                         </tr>
                                         {expandedSubmission === s.id && (
                                             <tr className="bg-black/30">
-                                                <td colSpan="7" className="p-6 border-b border-[#07fc03]/20">
+                                                <td colSpan="7" className="p-6 border-b border-white/20">
                                                     <div className="flex flex-col space-y-4">
                                                         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 text-gray-300 bg-gray-900/50 p-3 rounded border border-gray-700">
                                                             <div>
                                                                 <span className="text-xs text-gray-500 uppercase tracking-widest block mb-1">Submitter</span>
-                                                                <span className="font-bold text-[#07fc03]">{s.user_name}</span> <span className="text-gray-500 text-sm">(ID: {s.user_id})</span>
+                                                                <span className="font-bold text-white">{s.user_name}</span> <span className="text-gray-500 text-sm">(ID: {s.user_id})</span>
                                                             </div>
                                                             <div className="sm:text-right">
                                                                 <span className="text-xs text-gray-500 uppercase tracking-widest block mb-1">Problem</span>
@@ -593,7 +593,7 @@ const AdminDashboard = () => {
                                                                 <button 
                                                                     onClick={() => handleUpdateSubmissionStatus(s.id, 'Accepted')}
                                                                     disabled={statusUpdating}
-                                                                    className="bg-green-600 hover:bg-green-500 text-white px-6 py-2 rounded-md font-bold uppercase transition disabled:opacity-50"
+                                                                    className="bg-white hover:bg-zinc-200 text-white px-6 py-2 rounded-md font-bold uppercase transition disabled:opacity-50"
                                                                 >
                                                                     Approve (Correct)
                                                                 </button>
@@ -631,22 +631,22 @@ const AdminDashboard = () => {
                         <form onSubmit={handleCreateNote} className="space-y-4">
                             <div>
                                 <label className="block text-sm text-gray-400 mb-1">Title</label>
-                                <input required type="text" className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white focus:border-[#07fc03] focus:outline-none transition-colors" value={noteData.title} onChange={e => setNoteData({...noteData, title: e.target.value})} />
+                                <input required type="text" className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white focus:border-white focus:outline-none transition-colors" value={noteData.title} onChange={e => setNoteData({...noteData, title: e.target.value})} />
                             </div>
                             <div>
                                 <label className="block text-sm text-gray-400 mb-1">Topic</label>
-                                <input required type="text" className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white focus:border-[#07fc03] focus:outline-none transition-colors" value={noteData.topic} onChange={e => setNoteData({...noteData, topic: e.target.value})} placeholder="e.g. Arrays, Strings, DP" />
+                                <input required type="text" className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white focus:border-white focus:outline-none transition-colors" value={noteData.topic} onChange={e => setNoteData({...noteData, topic: e.target.value})} placeholder="e.g. Arrays, Strings, DP" />
                             </div>
                             <div>
                                 <label className="block text-sm text-gray-400 mb-1">Upload Note File (PDF etc.) {isEditingNote && <span className="text-xs text-yellow-500 ml-2">(Leave empty to keep current file)</span>}</label>
-                                <input type="file" className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white focus:border-[#07fc03] focus:outline-none transition-colors" onChange={e => setNoteData({...noteData, file: e.target.files[0]})} />
+                                <input type="file" className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white focus:border-white focus:outline-none transition-colors" onChange={e => setNoteData({...noteData, file: e.target.files[0]})} />
                             </div>
                             <div>
                                 <label className="block text-sm text-gray-400 mb-1">Content (Optional Description)</label>
-                                <textarea rows="3" className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white focus:border-[#07fc03] focus:outline-none transition-colors custom-scrollbar" value={noteData.content} onChange={e => setNoteData({...noteData, content: e.target.value})}></textarea>
+                                <textarea rows="3" className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white focus:border-white focus:outline-none transition-colors custom-scrollbar" value={noteData.content} onChange={e => setNoteData({...noteData, content: e.target.value})}></textarea>
                             </div>
                             <div className="flex space-x-3">
-                                <button type="submit" className="bg-[#07fc03] hover:bg-[#07fc03]/80 text-black px-4 py-2 rounded shadow-lg smooth-transition font-medium">
+                                <button type="submit" className="bg-white hover:bg-white/80 text-black px-4 py-2 rounded shadow-lg smooth-transition font-medium">
                                     {isEditingNote ? 'Update Note' : 'Upload Note'}
                                 </button>
                                 {isEditingNote && (
@@ -668,7 +668,7 @@ const AdminDashboard = () => {
                                 notes.map(note => (
                                     <div key={note.id} className="bg-gray-800/50 p-4 rounded-lg border border-gray-700 flex justify-between items-start">
                                         <div>
-                                            <h3 className="text-[#07fc03] font-bold">{note.title}</h3>
+                                            <h3 className="text-white font-bold">{note.title}</h3>
                                             <span className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded mt-1 inline-block">{note.topic}</span>
                                             {note.file_url && <a href={`${import.meta.env.VITE_API_URL}${note.file_url}`} target="_blank" rel="noreferrer" className="block text-xs text-blue-400 hover:text-blue-300 mt-1 uppercase tracking-wider font-mono">View File</a>}
                                         </div>
@@ -702,7 +702,7 @@ const AdminDashboard = () => {
                         <button
                             onClick={openReminderModal}
                             disabled={selectedUserIds.length === 0}
-                            className="bg-[#07fc03] hover:bg-[#07fc03]/80 text-black px-4 py-2 rounded shadow-lg smooth-transition font-bold disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                            className="bg-white hover:bg-white/80 text-black px-4 py-2 rounded shadow-lg smooth-transition font-bold disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                         >
                             <span>Send Email Reminder ({selectedUserIds.length})</span>
                         </button>
@@ -715,7 +715,7 @@ const AdminDashboard = () => {
                                     <th className="px-6 py-4 w-12 text-center">
                                         <input 
                                             type="checkbox" 
-                                            className="w-4 h-4 rounded bg-gray-900 border-gray-700 text-[#07fc03] focus:ring-[#07fc03]"
+                                            className="w-4 h-4 rounded bg-gray-900 border-gray-700 text-white focus:ring-[#ffffff]"
                                             onChange={handleSelectAllUsers}
                                             checked={users.length > 0 && selectedUserIds.length === users.length}
                                         />
@@ -740,7 +740,7 @@ const AdminDashboard = () => {
                                             <td className="px-6 py-4 text-center">
                                                 <input 
                                                     type="checkbox" 
-                                                    className="w-4 h-4 rounded bg-gray-900 border-gray-700 text-[#07fc03] focus:ring-[#07fc03]"
+                                                    className="w-4 h-4 rounded bg-gray-900 border-gray-700 text-white focus:ring-[#ffffff]"
                                                     checked={selectedUserIds.includes(u.id)}
                                                     onChange={() => handleSelectUser(u.id)}
                                                 />
@@ -753,7 +753,7 @@ const AdminDashboard = () => {
                                                     ) : (
                                                         <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-xs font-bold">{u.name.charAt(0).toUpperCase()}</div>
                                                     )}
-                                                    <Link to={`/user/${u.id}`} className="font-bold text-white hover:text-[#07fc03] transition-colors">
+                                                    <Link to={`/user/${u.id}`} className="font-bold text-white hover:text-white transition-colors">
                                                         {u.name}
                                                     </Link>
                                                 </div>
@@ -768,7 +768,7 @@ const AdminDashboard = () => {
                                                 {u.is_blocked ? (
                                                     <span className="px-2 py-1 rounded text-xs uppercase tracking-wider bg-red-900/50 text-red-400 border border-red-500/30">Blocked</span>
                                                 ) : (
-                                                    <span className="px-2 py-1 rounded text-xs uppercase tracking-wider bg-green-900/50 text-green-400 border border-green-500/30">Active</span>
+                                                    <span className="px-2 py-1 rounded text-xs uppercase tracking-wider bg-white/10 text-zinc-400 border border-white/30">Active</span>
                                                 )}
                                             </td>
                                             <td className="px-6 py-4 text-gray-500 text-sm">{new Date(u.created_at).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</td>
@@ -815,13 +815,13 @@ const AdminDashboard = () => {
                         </button>
                         
                         <h2 className="text-2xl font-bold text-white mb-2">Send Reminder</h2>
-                        <p className="text-gray-400 text-sm mb-6">Sending to <strong className="text-[#07fc03]">{selectedUserIds.length}</strong> selected user(s).</p>
+                        <p className="text-gray-400 text-sm mb-6">Sending to <strong className="text-white">{selectedUserIds.length}</strong> selected user(s).</p>
                         
                         <form onSubmit={handleSendReminder} className="space-y-4">
                             <div>
                                 <label className="block text-sm text-gray-400 mb-1">Template Type</label>
                                 <select 
-                                    className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white focus:border-[#07fc03] focus:outline-none"
+                                    className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white focus:border-white focus:outline-none"
                                     value={reminderData.type}
                                     onChange={handleReminderTypeChange}
                                 >
@@ -836,7 +836,7 @@ const AdminDashboard = () => {
                                 <input 
                                     required 
                                     type="text" 
-                                    className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white focus:border-[#07fc03] focus:outline-none" 
+                                    className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white focus:border-white focus:outline-none" 
                                     value={reminderData.subject} 
                                     onChange={e => setReminderData({...reminderData, subject: e.target.value})} 
                                 />
@@ -847,7 +847,7 @@ const AdminDashboard = () => {
                                 <textarea 
                                     required 
                                     rows="6" 
-                                    className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white focus:border-[#07fc03] focus:outline-none custom-scrollbar" 
+                                    className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white focus:border-white focus:outline-none custom-scrollbar" 
                                     value={reminderData.message} 
                                     onChange={e => setReminderData({...reminderData, message: e.target.value})}
                                 ></textarea>
@@ -860,7 +860,7 @@ const AdminDashboard = () => {
                                 <button 
                                     type="submit" 
                                     disabled={sendingReminder}
-                                    className="bg-[#07fc03] hover:bg-[#07fc03]/80 text-black px-6 py-2 rounded shadow-lg font-bold flex items-center justify-center disabled:opacity-50"
+                                    className="bg-white hover:bg-white/80 text-black px-6 py-2 rounded shadow-lg font-bold flex items-center justify-center disabled:opacity-50"
                                 >
                                     {sendingReminder ? 'Sending...' : 'Send Emails'}
                                 </button>

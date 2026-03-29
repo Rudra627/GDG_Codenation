@@ -60,15 +60,15 @@ const ContestDetailPage = () => {
                 const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
                 const m = Math.floor((diff / 1000 / 60) % 60);
                 const s = Math.floor((diff / 1000) % 60);
-                setTimeRemaining(`STARTS IN: ${d}d ${h}h ${m}m ${s}s`);
+                setTimeRemaining(`Starts in ${d}d ${h}h ${m}m ${s}s`);
             } else if (now >= start && now < end) {
                 const diff = end - now;
                 const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
                 const m = Math.floor((diff / 1000 / 60) % 60);
                 const s = Math.floor((diff / 1000) % 60);
-                setTimeRemaining(`ENDS IN: ${h}h ${m}m ${s}s`);
+                setTimeRemaining(`Ends in ${h}h ${m}m ${s}s`);
             } else {
-                setTimeRemaining('CONTEST OVER');
+                setTimeRemaining('Contest Over');
             }
         }, 1000);
 
@@ -83,7 +83,7 @@ const ContestDetailPage = () => {
             await axios.post(`${import.meta.env.VITE_API_URL}/api/contests/${id}/join`, {}, {
                 headers: { Authorization: `Bearer ${tk}` }
             });
-            setJoinMessage('Successfully Joined! You appear on the roster.');
+            setJoinMessage('Successfully joined! You appear on the roster.');
             // Refresh Leaderboard to show user at 0
             const lbRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/contests/${id}/leaderboard`, {
                 headers: { Authorization: `Bearer ${tk}` }
@@ -97,7 +97,7 @@ const ContestDetailPage = () => {
     };
 
     const handleSendReminder = async () => {
-        if (!window.confirm("Are you sure you want to email a reminder to EVERY participant?")) return;
+        if (!window.confirm("Are you sure you want to email a reminder to every participant?")) return;
         
         setSendingReminder(true);
         setReminderMessage('');
@@ -115,50 +115,55 @@ const ContestDetailPage = () => {
     };
 
     if (loading) return <Loader />;
-    if (!contest) return <div className="text-white p-12 text-center">Contest not found.</div>;
+    if (!contest) return <div className="text-white p-12 text-center bg-[#09090B] flex-grow flex items-center justify-center">Contest not found.</div>;
 
     const now = new Date();
     const start = new Date(contest.start_time);
     const status = now < start ? 'upcoming' : now < new Date(contest.end_time) ? 'active' : 'past';
 
-    let statusColor = "text-[#07fc03]";
-    if (status === 'active') statusColor = "text-red-500 animate-pulse";
-    if (status === 'past') statusColor = "text-gray-500";
+    const statusBadge = status === 'upcoming' 
+        ? 'text-white bg-white/[0.08] border-white/20'
+        : status === 'active'
+        ? 'text-red-400 bg-red-400/[0.08] border-red-400/20 animate-pulse'
+        : 'text-zinc-500 bg-zinc-500/[0.08] border-zinc-500/20';
 
     return (
-        <div className="flex-grow flex justify-center bg-black min-h-screen text-gray-300 font-mono p-4 md:p-8">
-            <div className="w-full max-w-5xl">
+        <div className="flex-grow flex justify-center bg-[#09090B] text-zinc-300 p-4 md:p-8 relative">
+            {/* Ambient glow */}
+            <div className="absolute top-0 left-1/3 w-[500px] h-[500px] bg-white/[0.03] rounded-full blur-[120px] pointer-events-none" />
+            
+            <div className="w-full max-w-5xl relative z-10">
                 
                 {/* Header Section */}
-                <div className="border border-[#07fc03]/30 bg-[#0a0a0a] rounded-xl p-8 mb-8 relative overflow-hidden">
-                    <div className="absolute -top-10 -right-10 text-[#07fc03]/10">
+                <div className="border border-white/[0.06] bg-[#111113] rounded-2xl p-8 mb-8 relative overflow-hidden">
+                    <div className="absolute -top-10 -right-10 text-white/[0.06]">
                         <Trophy size={200} />
                     </div>
                     
                     <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center">
                         <div>
-                            <div className="flex items-center gap-3 mb-2">
-                                <h1 className="text-3xl md:text-5xl font-bold text-white uppercase tracking-tight">{contest.title}</h1>
-                                <span className={`border border-current px-3 py-1 text-xs uppercase tracking-widest rounded-full ${statusColor}`}>
+                            <div className="flex items-center gap-3 mb-2 flex-wrap">
+                                <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">{contest.title}</h1>
+                                <span className={`border px-3 py-1 text-xs font-semibold uppercase tracking-wider rounded-full ${statusBadge}`}>
                                     {status}
                                 </span>
                             </div>
-                            <p className="text-gray-400 mt-4 max-w-2xl leading-relaxed">{contest.description}</p>
-                            <div className="flex items-center gap-6 mt-4 text-gray-400 text-sm">
+                            <p className="text-zinc-400 mt-4 max-w-2xl leading-relaxed text-sm">{contest.description}</p>
+                            <div className="flex items-center gap-6 mt-5 text-zinc-500 text-sm">
                                 <div className="flex items-center gap-2">
-                                    <Clock size={16} className="text-[#07fc03]/50" />
+                                    <Clock size={16} className="text-white/50" />
                                     <span>{new Date(contest.start_time).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })} - {new Date(contest.end_time).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <Users size={16} className="text-[#07fc03]/50" />
-                                    <span>{contest.participants_count || 0} Registered Users</span>
+                                    <Users size={16} className="text-white/50" />
+                                    <span>{contest.participants_count || 0} Registered</span>
                                 </div>
                             </div>
                         </div>
                         
                         <div className="mt-6 md:mt-0 flex flex-col items-end gap-3">
-                            <div className="text-2xl md:text-3xl font-bold text-[#07fc03] tracking-widest bg-black/50 border border-[#07fc03]/50 px-6 py-3 rounded-lg shadow-[0_0_15px_rgba(7,252,3,0.2)]">
-                                {timeRemaining || "CALCULATING..."}
+                            <div className="text-xl md:text-2xl font-bold text-white tracking-wide bg-white/[0.06] border border-white/20 px-6 py-3 rounded-xl shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+                                {timeRemaining || "Calculating..."}
                             </div>
                             
                             {user && user.role === 'Admin' && status === 'upcoming' && (
@@ -166,9 +171,9 @@ const ContestDetailPage = () => {
                                      <button 
                                         onClick={handleSendReminder}
                                         disabled={sendingReminder}
-                                        className="text-xs bg-red-900/50 hover:bg-red-800 text-red-200 border border-red-500 py-1 px-3 rounded transition-all uppercase tracking-widest disabled:opacity-50"
+                                        className="text-xs bg-red-500/[0.08] hover:bg-red-500/[0.15] text-red-400 border border-red-500/20 py-1.5 px-4 rounded-lg transition-all font-medium disabled:opacity-50"
                                      >
-                                         {sendingReminder ? 'SENDING EMAILS...' : 'ADMIN: SEND REMINDER (EMAIL)'}
+                                         {sendingReminder ? 'Sending emails...' : 'Admin: Send reminder email'}
                                      </button>
                                      {reminderMessage && <span className="text-xs text-red-400 mt-1">{reminderMessage}</span>}
                                 </div>
@@ -178,9 +183,9 @@ const ContestDetailPage = () => {
                                 <div className="flex flex-row items-end gap-2 mt-2">
                                      <Link 
                                         to={`/contests/${contest.id}/edit`}
-                                        className="text-xs bg-blue-900/50 hover:bg-blue-800 text-blue-200 border border-blue-500 py-1 px-3 rounded transition-all uppercase tracking-widest"
+                                        className="text-xs bg-[#06B6D4]/[0.08] hover:bg-[#06B6D4]/[0.15] text-[#06B6D4] border border-[#06B6D4]/20 py-1.5 px-4 rounded-lg transition-all font-medium"
                                      >
-                                         EDIT CONTEST
+                                         Edit Contest
                                      </Link>
                                      <button 
                                         onClick={async () => {
@@ -195,9 +200,9 @@ const ContestDetailPage = () => {
                                                 alert(err.response?.data?.message || 'Failed to delete contest');
                                             }
                                         }}
-                                        className="text-xs bg-gray-900/50 hover:bg-red-900 text-red-500 hover:text-white border border-red-900 hover:border-red-500 py-1 px-3 rounded transition-all uppercase tracking-widest"
+                                        className="text-xs bg-red-500/[0.08] hover:bg-red-500/[0.15] text-red-400 border border-red-500/20 py-1.5 px-4 rounded-lg transition-all font-medium"
                                      >
-                                         DELETE
+                                         Delete
                                      </button>
                                 </div>
                             )}
@@ -206,35 +211,34 @@ const ContestDetailPage = () => {
                     
                     {/* Join Logic Action Center */}
                     {status === 'upcoming' && (
-                        <div className="mt-10 border-t border-gray-800 pt-8 flex flex-col items-center">
+                        <div className="mt-10 border-t border-white/[0.06] pt-8 flex flex-col items-center">
                             <button 
                                 onClick={handleJoin} 
                                 disabled={joining}
-                                className="bg-[#07fc03] hover:bg-[#00cc00] text-black font-bold uppercase tracking-widest px-12 py-4 shadow-[0_0_20px_rgba(7,252,3,0.4)] transition-all transform hover:scale-105 rounded-sm disabled:opacity-50"
-                                style={{ clipPath: 'polygon(5% 0, 100% 0, 95% 100%, 0% 100%)' }}
+                                className="bg-white hover:bg-[#00e085] text-[#09090B] font-bold text-sm px-10 py-3.5 rounded-lg shadow-[0_0_24px_rgba(255,255,255,0.25)] hover:shadow-[0_0_32px_rgba(255,255,255,0.35)] transition-all duration-300 transform hover:scale-105 disabled:opacity-50"
                             >
-                                {joining ? 'ESTABLISHING CONNECTION...' : 'JOIN PROTOCOL'}
+                                {joining ? 'Joining...' : 'Join Contest'}
                             </button>
-                            {joinMessage && <p className="mt-4 text-[#07fc03] tracking-widest">{joinMessage}</p>}
+                            {joinMessage && <p className="mt-4 text-white text-sm font-medium">{joinMessage}</p>}
                         </div>
                     )}
                 </div>
 
                 {/* Tabs */}
                 {status !== 'upcoming' && (
-                    <div className="flex space-x-1 mb-6 border-b border-gray-800">
+                    <div className="flex space-x-1 mb-6 border-b border-white/[0.06]">
                         <button 
-                            className={`px-8 py-3 text-sm font-bold uppercase tracking-widest smooth-transition ${activeTab === 'problems' ? 'text-[#07fc03] border-b-2 border-[#07fc03] bg-[#07fc03]/10' : 'text-gray-500 hover:text-white hover:bg-white/5'}`}
+                            className={`px-6 py-3 text-sm font-semibold transition-all ${activeTab === 'problems' ? 'text-white border-b-2 border-white bg-white/[0.04]' : 'text-zinc-500 hover:text-white hover:bg-white/[0.02]'}`}
                             onClick={() => setActiveTab('problems')}
                         >
-                            <PlayCircle size={16} className="inline mr-2" />
+                            <PlayCircle size={15} className="inline mr-2" />
                             Problems
                         </button>
                         <button 
-                            className={`px-8 py-3 text-sm font-bold uppercase tracking-widest smooth-transition ${activeTab === 'leaderboard' ? 'text-[#07fc03] border-b-2 border-[#07fc03] bg-[#07fc03]/10' : 'text-gray-500 hover:text-white hover:bg-white/5'}`}
+                            className={`px-6 py-3 text-sm font-semibold transition-all ${activeTab === 'leaderboard' ? 'text-white border-b-2 border-white bg-white/[0.04]' : 'text-zinc-500 hover:text-white hover:bg-white/[0.02]'}`}
                             onClick={() => setActiveTab('leaderboard')}
                         >
-                            <Trophy size={16} className="inline mr-2" />
+                            <Trophy size={15} className="inline mr-2" />
                             Leaderboard
                         </button>
                     </div>
@@ -242,63 +246,63 @@ const ContestDetailPage = () => {
 
                 {/* Tab Views */}
                 {status !== 'upcoming' && activeTab === 'problems' && (
-                    <div className="space-y-4">
+                    <div className="space-y-3">
                         {contest.problems && contest.problems.length > 0 ? (
                             contest.problems.map((p, idx) => (
                                 <Link 
                                     to={`/problem/${p.id}?contestId=${contest.id}`} 
                                     key={p.id}
-                                    className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-[#0a0a0a] border border-[#07fc03]/20 hover:border-[#07fc03]/80 p-4 sm:p-5 rounded-lg smooth-transition group gap-4 sm:gap-0"
+                                    className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-[#111113] border border-white/[0.06] hover:border-white/30 p-4 sm:p-5 rounded-xl transition-all duration-300 group gap-4 sm:gap-0"
                                 >
                                     <div className="flex items-center gap-4 sm:gap-6">
-                                        <div className="text-xl sm:text-2xl font-bold text-gray-700 group-hover:text-[#07fc03]/50 w-6 sm:w-8">{idx + 1}</div>
+                                        <div className="text-xl sm:text-2xl font-bold text-zinc-700 group-hover:text-white/50 w-6 sm:w-8 transition-colors">{idx + 1}</div>
                                         <div>
-                                            <h3 className="text-lg sm:text-xl font-bold text-gray-200 group-hover:text-white">{p.title}</h3>
-                                            <span className={`text-[10px] sm:text-xs uppercase tracking-widest ${p.difficulty==='Easy'?'text-green-500':p.difficulty==='Medium'?'text-yellow-500':'text-red-500'}`}>
+                                            <h3 className="text-base sm:text-lg font-semibold text-zinc-200 group-hover:text-white transition-colors">{p.title}</h3>
+                                            <span className={`text-xs font-medium ${p.difficulty==='Easy'?'text-zinc-400':p.difficulty==='Medium'?'text-yellow-400':'text-red-400'}`}>
                                                 {p.difficulty}
                                             </span>
                                         </div>
                                     </div>
                                     <div className="flex flex-col items-end self-end sm:self-auto">
-                                        <span className="text-[#07fc03] tracking-widest font-bold text-sm sm:text-base">{p.points} PTS</span>
+                                        <span className="text-white font-bold text-sm sm:text-base">{p.points} pts</span>
                                     </div>
                                 </Link>
                             ))
                         ) : (
-                            <p className="text-gray-500 text-center py-12 border border-dashed border-gray-800 rounded-xl">No problems assigned to this contest.</p>
+                            <p className="text-zinc-500 text-center py-12 border border-dashed border-white/[0.06] rounded-xl text-sm">No problems assigned to this contest.</p>
                         )}
                     </div>
                 )}
 
                 {status !== 'upcoming' && activeTab === 'leaderboard' && (
-                    <div className="border border-gray-800 bg-[#0a0a0a] rounded-xl overflow-x-auto">
+                    <div className="border border-white/[0.06] bg-[#111113] rounded-2xl overflow-x-auto">
                         <div className="min-w-[600px]">
                             <table className="w-full text-left">
-                                <thead className="bg-black border-b border-[#07fc03]/30 text-xs uppercase tracking-widest text-[#07fc03]">
+                                <thead className="bg-[#0c0c0e] border-b border-white/[0.06] text-xs uppercase tracking-wider text-white">
                                     <tr>
-                                        <th className="px-6 py-4">Rank</th>
-                                        <th className="px-6 py-4">Hacker</th>
-                                        <th className="px-6 py-4">Score</th>
-                                        <th className="px-6 py-4">Penalty (Mins)</th>
+                                        <th className="px-6 py-4 font-semibold">Rank</th>
+                                        <th className="px-6 py-4 font-semibold">Participant</th>
+                                        <th className="px-6 py-4 font-semibold">Score</th>
+                                        <th className="px-6 py-4 font-semibold">Penalty (Mins)</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-800">
+                                <tbody className="divide-y divide-white/[0.04]">
                                     {leaderboard.map((lb, idx) => (
-                                        <tr key={lb.user_id} className="hover:bg-[#07fc03]/5 smooth-transition">
+                                        <tr key={lb.user_id} className="hover:bg-white/[0.02] transition-colors">
                                             <td className="px-6 py-4">
-                                                {idx === 0 ? <span className="text-yellow-500 font-bold text-xl drop-shadow-[0_0_10px_rgba(255,215,0,0.8)]">#1</span> 
-                                                : idx === 1 ? <span className="text-gray-300 font-bold text-lg">#2</span>
-                                                : idx === 2 ? <span className="text-amber-700 font-bold text-lg">#3</span>
-                                                : <span className="text-gray-500 font-bold">#{idx + 1}</span>}
+                                                {idx === 0 ? <span className="text-yellow-400 font-bold text-lg">🥇</span> 
+                                                : idx === 1 ? <span className="text-zinc-300 font-bold text-lg">🥈</span>
+                                                : idx === 2 ? <span className="text-amber-600 font-bold text-lg">🥉</span>
+                                                : <span className="text-zinc-500 font-semibold">#{idx + 1}</span>}
                                             </td>
-                                            <td className="px-6 py-4 text-white font-bold">{lb.name}</td>
-                                            <td className="px-6 py-4 text-[#07fc03] font-bold">{lb.score}</td>
+                                            <td className="px-6 py-4 text-white font-semibold">{lb.name}</td>
+                                            <td className="px-6 py-4 text-white font-bold">{lb.score}</td>
                                             <td className="px-6 py-4 text-red-400">{lb.penalty}</td>
                                         </tr>
                                     ))}
                                     {leaderboard.length === 0 && (
                                         <tr>
-                                            <td colSpan="4" className="px-6 py-12 text-center text-gray-500">No participants registered or ranked yet.</td>
+                                            <td colSpan="4" className="px-6 py-12 text-center text-zinc-500 text-sm">No participants registered or ranked yet.</td>
                                         </tr>
                                     )}
                                 </tbody>

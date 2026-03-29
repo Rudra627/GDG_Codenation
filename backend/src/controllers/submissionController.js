@@ -27,10 +27,10 @@ exports.runCode = async (req, res) => {
             return res.status(400).json({ message: 'problemId, language, and code are required.' });
         }
 
-        console.log('--- USER RAN CODE ---');
-        console.log(`Language: ${language}`);
-        console.log(code);
-        console.log('---------------------');
+        // console.log('--- USER RAN CODE ---');
+        // console.log(`Language: ${language}`);
+        // // console.log(code);
+        // console.log('---------------------');
 
         let testCasesToRun = [];
 

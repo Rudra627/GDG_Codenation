@@ -1,10 +1,12 @@
 import { useState, useContext } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { Code2, LogOut, User, Trophy, Menu, X } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
+import { LogOut, User, Menu, X, Code2 } from 'lucide-react';
 
 const Navbar = () => {
     const { user, logout } = useContext(AuthContext);
+    const { theme, toggleTheme } = useTheme();
     const navigate = useNavigate();
     const location = useLocation();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -15,153 +17,156 @@ const Navbar = () => {
         setIsMobileMenuOpen(false);
     };
 
-    const navLinkClass = "text-xs font-mono tracking-[0.2em] uppercase text-gray-500 hover:text-white smooth-transition relative group";
-    const activeLinkClass = "text-[#07fc03]";
+    const isActive = (path) => {
+        if (path === '/') return location.pathname === '/';
+        return location.pathname.startsWith(path);
+    };
 
-    const getLinkClass = (path) => {
-        return `${navLinkClass} ${location.pathname === path ? activeLinkClass : ''}`;
+    const navLink = (path, label) => {
+        const active = isActive(path);
+        return (
+            <Link
+                to={path}
+                className={`text-sm font-medium tracking-wide transition-all duration-200 px-4 py-1.5 rounded-full ${
+                    active
+                        ? 'bg-white/10 text-white'
+                        : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                }`}
+            >
+                {label}
+            </Link>
+        );
     };
 
     return (
         <>
-        <nav className="bg-black/90 backdrop-blur-xl border-b border-[#07fc03]/30 sticky top-0 z-[100] px-4 md:px-8 py-4 sm:py-5 flex items-center justify-between font-mono">
-            <Link to="/" className="flex items-center space-x-2 sm:space-x-3 hover:opacity-80 smooth-transition z-50" onClick={() => setIsMobileMenuOpen(false)}>
-                <div className="bg-[#07fc03] w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(7,252,3,0.4)]">
-                    <span className="text-white font-bold text-sm sm:text-lg leading-none">&lt;/&gt;</span>
+        <nav className="bg-[#0f0f11]/80 backdrop-blur-2xl border-b border-white/[0.05] sticky top-0 z-[100] px-6 md:px-10 py-4 flex items-center justify-between">
+            {/* Left Section: Logo */}
+            <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity z-50 group" onClick={() => setIsMobileMenuOpen(false)}>
+                <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-[0_0_15px_rgba(255,255,255,0.2)] group-hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-shadow">
+                    <Code2 size={16} className="text-black" />
                 </div>
-                <span className="text-[#07fc03] text-xl sm:text-2xl font-bold tracking-tight">CodeNation</span>
+                <span className="text-white font-semibold tracking-tight text-lg">GDG Code Nation</span>
             </Link>
 
-            {/* Desktop Navigation Links (Middle) */}
-            <div className="hidden lg:flex items-center justify-center space-x-8 xl:space-x-12 absolute left-1/2 -translate-x-1/2">
-                 <Link to="/" className={getLinkClass('/')}>
-                    SYSTEM
-                    {location.pathname === '/' && <div className="absolute -bottom-6 left-0 right-0 h-0.5 bg-[#07fc03] shadow-[0_0_10px_#07fc03]"></div>}
-                </Link>
+            {/* Center Section: Navigation Links */}
+            <div className="hidden lg:flex items-center gap-2 absolute left-1/2 -translate-x-1/2 bg-white/[0.03] p-1 rounded-full border border-white/[0.05]">
+                {navLink('/', 'Home')}
                 {user && (
                     <>
-                        <Link to="/problems" className={getLinkClass('/problems')}>
-                            CHALLENGES
-                            {location.pathname === '/problems' && <div className="absolute -bottom-6 left-0 right-0 h-0.5 bg-[#07fc03] shadow-[0_0_10px_#07fc03]"></div>}
-                        </Link>
-                        <Link to="/contests" className={getLinkClass('/contests')}>
-                            CONTESTS
-                            {location.pathname.startsWith('/contests') && <div className="absolute -bottom-6 left-0 right-0 h-0.5 bg-[#07fc03] shadow-[0_0_10px_#07fc03]"></div>}
-                        </Link>
-                        <Link to="/roadmap" className={getLinkClass('/roadmap')}>
-                            ROADMAP
-                            {location.pathname === '/roadmap' && <div className="absolute -bottom-6 left-0 right-0 h-0.5 bg-[#07fc03] shadow-[0_0_10px_#07fc03]"></div>}
-                        </Link>
-                        <Link to="/notes" className={getLinkClass('/notes')}>
-                            NOTES
-                            {location.pathname === '/notes' && <div className="absolute -bottom-6 left-0 right-0 h-0.5 bg-[#07fc03] shadow-[0_0_10px_#07fc03]"></div>}
-                        </Link>
+                        {navLink('/problems', 'Problems')}
+                        {navLink('/contests', 'Contests')}
+                        {navLink('/roadmap', 'Roadmap')}
+                        {navLink('/notes', 'Notes')}
                     </>
                 )}
-                {user?.role === 'Admin' && (
-                    <Link to="/admin" className={getLinkClass('/admin')}>
-                        TERMINAL
-                         {location.pathname === '/admin' && <div className="absolute -bottom-6 left-0 right-0 h-0.5 bg-[#07fc03] shadow-[0_0_10px_#07fc03]"></div>}
-                    </Link>
-                )}
+                {user?.role === 'Admin' && navLink('/admin', 'Admin')}
             </div>
 
-            {/* Right side Auth Controls Desktop */}
-            <div className="hidden md:flex items-center space-x-4 lg:space-x-6">
+            {/* Right Section: Action Button */}
+            <div className="hidden md:flex items-center gap-4">
                 {user ? (
                     <>
-                        <Link to="/profile" className="flex items-center space-x-2 text-gray-400 font-mono text-xs tracking-widest uppercase hover:text-[#07fc03] border-b border-transparent hover:border-[#07fc03] pb-1 smooth-transition">
+                        <Link to="/profile" className="flex items-center gap-2 text-zinc-400 text-sm hover:text-white transition-colors bg-white/[0.03] p-1 pr-3 rounded-full border border-white/[0.05]">
                             {user.profile_image_url ? (
                                 <img 
                                     src={user.profile_image_url.startsWith('http') ? user.profile_image_url : `${import.meta.env.VITE_API_URL}${user.profile_image_url}`} 
                                     alt="Avatar" 
-                                    className="w-5 h-5 rounded-sm object-cover border border-[#07fc03]/50" 
+                                    className="w-7 h-7 rounded-full object-cover border border-white/10" 
                                 />
                             ) : (
-                                <User size={14} className="text-[#07fc03]" />
+                                <div className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center">
+                                    <User size={14} className="text-zinc-400" />
+                                </div>
                             )}
-                            <span className="hidden sm:inline-block max-w-[100px] truncate">{user.name}</span>
+                            <span className="text-xs font-medium">{user.username || 'Profile'}</span>
                         </Link>
                         <button 
                             onClick={handleLogout}
-                            className="text-xs font-mono tracking-widest uppercase text-gray-500 hover:text-red-500 smooth-transition flex items-center space-x-2"
+                            className="text-zinc-400 hover:text-white p-2 rounded-full hover:bg-white/5 transition-all flex items-center justify-center"
+                            title="Logout"
                         >
-                            <span>LOGOUT</span>
-                            <LogOut size={14} />
+                            <LogOut size={18} />
                         </button>
                     </>
                 ) : (
                     <>
-                        <Link to="/login" className={getLinkClass('/login')}>LOGIN</Link>
-                        <Link to="/register" className="text-xs font-mono tracking-widest uppercase border border-[#07fc03]/40 hover:border-[#07fc03] hover:text-black hover:bg-[#07fc03] text-[#07fc03] px-4 py-2 sm:px-6 sm:py-2.5 rounded-sm smooth-transition shadow-[0_0_10px_rgba(7,252,3,0.1)] hover:shadow-[0_0_15px_rgba(7,252,3,0.4)]">
-                            REGISTER
+                        <Link to="/login" className={`text-sm font-medium transition-colors px-4 py-2 rounded-full hover:bg-white/5 ${isActive('/login') ? 'text-white' : 'text-zinc-400 hover:text-white'}`}>Log in</Link>
+                        <Link to="/register" className="bg-white hover:bg-zinc-200 text-black px-5 py-2 rounded-full text-sm font-semibold tracking-wide transition-all shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+                            Sign up
                         </Link>
                     </>
                 )}
             </div>
 
-            {/* Mobile Menu Icon */}
+            {/* Mobile Menu Toggle */}
             <button 
-                className="md:hidden text-[#07fc03] z-[110] p-2 relative"
+                className="md:hidden text-zinc-400 hover:text-white z-[110] p-2 rounded-full hover:bg-white/5"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
-                {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
+                {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
         </nav>
 
-        {/* Mobile Menu Overlay */}
+        {/* Mobile Backdrop */}
         {isMobileMenuOpen && (
             <div 
-                className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[105] md:hidden"
+                className="fixed inset-0 bg-[#0f0f11]/80 backdrop-blur-md z-[105] md:hidden"
                 onClick={() => setIsMobileMenuOpen(false)}
-            ></div>
+            />
         )}
 
-        {/* Mobile Navigation Sidebar */}
-        <div className={`fixed top-0 right-0 h-full w-64 bg-[#0a0a0a] border-l border-[#07fc03]/30 z-[110] transform transition-transform duration-300 ease-in-out md:hidden flex flex-col pt-24 px-6 space-y-6 overflow-y-auto ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+        {/* Mobile Sidebar */}
+        <div className={`fixed top-0 right-0 h-full w-72 bg-[#1a1a1c] border-l border-white/[0.05] z-[110] transform transition-transform duration-300 ease-out md:hidden flex flex-col pt-24 px-6 gap-2 overflow-y-auto shadow-2xl ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
             <button 
-                className="absolute top-4 right-4 text-[#07fc03] p-2"
+                className="absolute top-6 right-6 text-zinc-500 hover:text-white p-2 rounded-full hover:bg-white/5"
                 onClick={() => setIsMobileMenuOpen(false)}
             >
-                <X size={28} />
+                <X size={22} />
             </button>
-            <Link to="/" className="text-lg font-mono tracking-widest uppercase text-white hover:text-[#07fc03] w-full border-b border-gray-800 pb-3" onClick={() => setIsMobileMenuOpen(false)}>SYSTEM</Link>
+
+            <Link to="/" className="text-sm font-medium text-zinc-400 hover:text-white py-3 px-4 rounded-xl hover:bg-white/5 transition-colors" onClick={() => setIsMobileMenuOpen(false)}>Home</Link>
             
             {user && (
                 <>
-                    <Link to="/problems" className="text-lg font-mono tracking-widest uppercase text-white hover:text-[#07fc03] w-full border-b border-gray-800 pb-3" onClick={() => setIsMobileMenuOpen(false)}>CHALLENGES</Link>
-                    <Link to="/contests" className="text-lg font-mono tracking-widest uppercase text-white hover:text-[#07fc03] w-full border-b border-gray-800 pb-3" onClick={() => setIsMobileMenuOpen(false)}>CONTESTS</Link>
-                    <Link to="/roadmap" className="text-lg font-mono tracking-widest uppercase text-white hover:text-[#07fc03] w-full border-b border-gray-800 pb-3" onClick={() => setIsMobileMenuOpen(false)}>ROADMAP</Link>
-                    <Link to="/notes" className="text-lg font-mono tracking-widest uppercase text-white hover:text-[#07fc03] w-full border-b border-gray-800 pb-3" onClick={() => setIsMobileMenuOpen(false)}>NOTES</Link>
+                    <Link to="/problems" className="text-sm font-medium text-zinc-400 hover:text-white py-3 px-4 rounded-xl hover:bg-white/5 transition-colors" onClick={() => setIsMobileMenuOpen(false)}>Problems</Link>
+                    <Link to="/contests" className="text-sm font-medium text-zinc-400 hover:text-white py-3 px-4 rounded-xl hover:bg-white/5 transition-colors" onClick={() => setIsMobileMenuOpen(false)}>Contests</Link>
+                    <Link to="/roadmap" className="text-sm font-medium text-zinc-400 hover:text-white py-3 px-4 rounded-xl hover:bg-white/5 transition-colors" onClick={() => setIsMobileMenuOpen(false)}>Roadmap</Link>
+                    <Link to="/notes" className="text-sm font-medium text-zinc-400 hover:text-white py-3 px-4 rounded-xl hover:bg-white/5 transition-colors" onClick={() => setIsMobileMenuOpen(false)}>Notes</Link>
                     
-                    <Link to="/profile" className="flex items-center space-x-3 text-lg font-mono tracking-widest uppercase text-white hover:text-[#07fc03] w-full border-b border-gray-800 pb-3 mt-4" onClick={() => setIsMobileMenuOpen(false)}>
-                          {user.profile_image_url ? (
+                    <div className="h-px bg-white/[0.05] w-full my-2"></div>
+
+                    <Link to="/profile" className="flex items-center gap-3 text-sm font-medium text-zinc-400 hover:text-white py-3 px-4 rounded-xl hover:bg-white/5 transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
+                        {user.profile_image_url ? (
                             <img 
                                 src={user.profile_image_url.startsWith('http') ? user.profile_image_url : `${import.meta.env.VITE_API_URL}${user.profile_image_url}`} 
                                 alt="Avatar" 
-                                className="w-8 h-8 rounded-sm object-cover border border-[#07fc03]/50" 
+                                className="w-8 h-8 rounded-full object-cover border border-white/10" 
                             />
                         ) : (
-                            <User size={24} className="text-[#07fc03]" />
+                            <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                                <User size={16} />
+                            </div>
                         )}
-                        <span>PROFILE</span>
+                        <span>Profile</span>
                     </Link>
 
                     {user?.role === 'Admin' && (
-                        <Link to="/admin" className="text-lg font-mono tracking-widest uppercase text-[#07fc03] hover:text-white w-full border-b border-gray-800 pb-3" onClick={() => setIsMobileMenuOpen(false)}>TERMINAL (ADMIN)</Link>
+                        <Link to="/admin" className="text-sm font-medium text-white bg-white/10 py-3 px-4 rounded-xl hover:bg-white/20 transition-colors mt-2" onClick={() => setIsMobileMenuOpen(false)}>Admin Panel</Link>
                     )}
                     
-                    <button onClick={handleLogout} className="text-lg font-mono tracking-widest uppercase text-red-500 hover:text-red-400 flex items-center space-x-2 w-full pt-4">
-                        <LogOut size={20} />
-                        <span>LOGOUT</span>
+                    <button onClick={handleLogout} className="text-sm font-medium text-zinc-400 hover:text-white flex items-center gap-2 py-3 px-4 rounded-xl hover:bg-white/5 transition-colors mt-2">
+                        <LogOut size={16} />
+                        <span>Logout</span>
                     </button>
                 </>
             )}
 
             {!user && (
                 <>
-                    <Link to="/login" className="text-lg font-mono tracking-widest uppercase text-white hover:text-[#07fc03] w-full border-b border-gray-800 pb-3" onClick={() => setIsMobileMenuOpen(false)}>LOGIN</Link>
-                    <Link to="/register" className="text-lg font-mono tracking-widest uppercase border border-[#07fc03] text-[#07fc03] px-6 py-2 rounded-sm hover:bg-[#07fc03] hover:text-black smooth-transition text-center mt-4 w-full block" onClick={() => setIsMobileMenuOpen(false)}>REGISTER</Link>
+                    <div className="h-px bg-white/[0.05] w-full my-2"></div>
+                    <Link to="/login" className="text-sm font-medium text-zinc-400 hover:text-white py-3 px-4 rounded-xl hover:bg-white/5 transition-colors" onClick={() => setIsMobileMenuOpen(false)}>Log in</Link>
+                    <Link to="/register" className="block text-center bg-white text-black font-semibold px-6 py-3 rounded-full mt-4 shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:bg-zinc-200 transition-colors" onClick={() => setIsMobileMenuOpen(false)}>Sign up</Link>
                 </>
             )}
         </div>
