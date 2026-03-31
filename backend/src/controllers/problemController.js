@@ -19,7 +19,7 @@ exports.createProblem = async (req, res) => {
 // @desc    Get all problems (User/Admin)
 exports.getProblems = async (req, res) => {
     try {
-        const [problems] = await pool.query('SELECT id, title, difficulty, topics, created_at FROM problems');
+        const [problems] = await pool.query('SELECT id, title, description, difficulty, created_at, is_daily FROM problems');
         res.status(200).json(problems);
     } catch (error) {
         console.error(error);

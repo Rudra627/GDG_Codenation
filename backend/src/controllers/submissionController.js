@@ -3,11 +3,17 @@ const { executeCode } = require('../services/codeExecutionService');
 
 // Helper to fetch driver code
 const getDriverCode = async (problemId, language) => {
-    const [rows] = await pool.query(
-        'SELECT driver_code FROM problem_templates WHERE problem_id = ? AND language = ?',
-        [problemId, language]
-    );
-    return rows.length > 0 ? rows[0].driver_code : null;
+    try {
+        const [rows] = await pool.query(
+            'SELECT driver_code FROM problem_templates WHERE problem_id = ? AND language = ?',
+            [problemId, language]
+        );
+        return rows.length > 0 ? rows[0].driver_code : null;
+    } catch (error) {
+        // problem_templates table may not exist, return null to use raw user code
+        console.warn('Warning: problem_templates table not found, using raw user code');
+        return null;
+    }
 };
 
 // Helper to build final code

@@ -1,4 +1,4 @@
-# GDG Codenation Platform
+<h1>GDG Codenation Platform</h1>
 
 A full-stack coding platform with user authentication, problem viewing, code execution, and an admin dashboard for managing problems and test cases.
 
