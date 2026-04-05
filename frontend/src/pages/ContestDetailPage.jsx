@@ -31,7 +31,7 @@ const ContestDetailPage = () => {
                 });
                 setContest(res.data);
                 
-                // Fetch Leaderboard
+
                 const lbRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/contests/${id}/leaderboard`, {
                     headers: { Authorization: `Bearer ${tk}` }
                 });
@@ -46,7 +46,7 @@ const ContestDetailPage = () => {
         fetchContest();
     }, [id, token]);
 
-    // Countdown Timer Logic
+    
     useEffect(() => {
         if (!contest) return;
 
