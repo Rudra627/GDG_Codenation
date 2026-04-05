@@ -127,7 +127,7 @@ const HomePage = () => {
                     <Users className="text-white mb-6" size={32} />
                     <h3 className="text-zinc-200 font-bold tracking-widest uppercase mb-4 text-sm group-hover:text-white transition-colors">Community</h3>
                     <p className="text-zinc-400 text-sm leading-relaxed mb-6">Join our GDG WhatsApp group where you can interact with us</p>
-                    <button className="bg-white hover:bg-zinc-200 text-black font-semibold text-xs px-6 py-2.5 rounded-full transition-all w-full">Join Group</button>
+                    <button className="bg-white hover:bg-zinc-200 text-black font-semibold text-xs px-6 py-2.5 rounded-full transition-all w-full" href='https://chat.whatsapp.com/IDhNDQ4qxgA26mzbxvndIo'>Join Group</button>
                 </div>
             </motion.section>
 

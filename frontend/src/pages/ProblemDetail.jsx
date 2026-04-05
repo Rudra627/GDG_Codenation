@@ -4,6 +4,7 @@ import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import Editor from '@monaco-editor/react';
 import Split from 'react-split';
+import { Skeleton } from 'boneyard-js/react';
 import {
     Play, Send, RotateCcw, FileText, Code2,
     CheckCheck, XCircle, AlertTriangle, Clock, CheckCircle2,
@@ -325,15 +326,14 @@ const ProblemDetail = () => {
     const langConfig = LANGUAGES.find(l => l.id === language) || LANGUAGES[0];
 
     if (loading) return (
-        <div className="flex-grow flex items-center justify-center bg-[#09090B]">
-            <div className="flex flex-col items-center gap-3">
-                <Spinner color="#ffffff" size={28} />
-                <p className="text-gray-400 text-sm">Loading problem...</p>
-            </div>
+        <div className="flex-grow relative w-full" style={{ background: '#09090B' }}>
+            <Skeleton name="problem-detail-page" loading={true}>
+                <div className="absolute inset-0 w-full h-full" />
+            </Skeleton>
         </div>
     );
     if (!problem) return (
-        <div className="flex-grow flex items-center justify-center bg-[#09090B]">
+        <div className="flex-grow flex items-center justify-center bg-[#09090B] min-h-[100dvh]">
             <p className="text-red-400 text-sm">Problem not found.</p>
         </div>
     );

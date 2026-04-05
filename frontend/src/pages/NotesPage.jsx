@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Search, Tag, BookOpen } from 'lucide-react';
 import Loader from '../components/Loader';
+import { Skeleton } from 'boneyard-js/react';
 
 const NotesPage = () => {
     const [notes, setNotes] = useState([]);
@@ -137,11 +138,7 @@ const NotesPage = () => {
 
                 {/* Main Content */}
                 <div className="lg:col-span-3">
-                    {isLoading ? (
-                        <div className="flex justify-center py-20">
-                            <div className="w-10 h-10 border-2 border-zinc-700 border-t-[#ffffff] rounded-full animate-spin" />
-                        </div>
-                    ) : (
+                    <Skeleton name="note-card" loading={isLoading}>
                         <div className="grid grid-cols-1 gap-5">
                             {notes.length === 0 ? (
                                 <div className="glass p-10 rounded-xl text-center border border-dashed border-zinc-700">
@@ -187,7 +184,7 @@ const NotesPage = () => {
                                 ))
                             )}
                         </div>
-                    )}
+                    </Skeleton>
                 </div>
             </div>
         </div>

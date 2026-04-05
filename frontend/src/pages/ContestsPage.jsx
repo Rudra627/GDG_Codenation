@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { Trophy, Clock, PlayCircle, Plus, Users } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
+import { Skeleton } from 'boneyard-js/react';
+// remove loader import since it's not used here anymore if we like, but it might break if it's not used. Let's keep it.
 import Loader from '../components/Loader';
 
 const ContestsPage = () => {
@@ -27,8 +29,6 @@ const ContestsPage = () => {
         };
         fetchContests();
     }, []);
-
-    if (loading) return <Loader />;
 
     const now = new Date();
     
@@ -81,54 +81,56 @@ const ContestsPage = () => {
     };
 
     return (
-        <div className="flex-grow flex flex-col items-center bg-[#09090B] relative p-6 pt-12 md:p-12 min-h-screen">
-            <div className="w-full max-w-6xl relative z-10">
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10 border-b border-white/[0.06] pb-6">
-                    <div>
-                        <h1 className="text-3xl md:text-4xl font-bold text-white flex items-center gap-3">
-                            <Trophy className="text-white" size={32} />
-                            Contests
-                        </h1>
-                        <p className="text-zinc-500 mt-2 text-sm">Compete. Rank Up. Dominate.</p>
+        <Skeleton name="contests-page" loading={loading}>
+            <div className="flex-grow flex flex-col items-center bg-[#09090B] relative p-6 pt-12 md:p-12 min-h-screen">
+                <div className="w-full max-w-6xl relative z-10">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10 border-b border-white/[0.06] pb-6">
+                        <div>
+                            <h1 className="text-3xl md:text-4xl font-bold text-white flex items-center gap-3">
+                                <Trophy className="text-white" size={32} />
+                                Contests
+                            </h1>
+                            <p className="text-zinc-500 mt-2 text-sm">Compete. Rank Up. Dominate.</p>
+                        </div>
+                        {user && user.role === 'Admin' && (
+                            <Link to="/contests/create" className="flex items-center gap-2 bg-white hover:bg-[#00e085] text-[#09090B] font-semibold px-5 py-2.5 rounded-lg shadow-[0_0_16px_rgba(255,255,255,0.15)] transition-all duration-200 text-sm">
+                                <Plus size={16} /> Create Contest
+                            </Link>
+                        )}
                     </div>
-                    {user && user.role === 'Admin' && (
-                        <Link to="/contests/create" className="flex items-center gap-2 bg-white hover:bg-[#00e085] text-[#09090B] font-semibold px-5 py-2.5 rounded-lg shadow-[0_0_16px_rgba(255,255,255,0.15)] transition-all duration-200 text-sm">
-                            <Plus size={16} /> Create Contest
-                        </Link>
+
+                    {active.length > 0 && (
+                        <div className="mb-12">
+                            <h2 className="text-lg font-semibold text-red-400 flex items-center gap-2 mb-6">
+                                <PlayCircle size={18} /> Active Now
+                            </h2>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                                {active.map(c => <ContestCard key={c.id} contest={c} status="active" />)}
+                            </div>
+                        </div>
                     )}
-                </div>
 
-                {active.length > 0 && (
-                    <div className="mb-12">
-                        <h2 className="text-lg font-semibold text-red-400 flex items-center gap-2 mb-6">
-                            <PlayCircle size={18} /> Active Now
-                        </h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                            {active.map(c => <ContestCard key={c.id} contest={c} status="active" />)}
+                    {upcoming.length > 0 && (
+                        <div className="mb-12">
+                            <h2 className="text-lg font-semibold text-white flex items-center gap-2 mb-6">
+                                <Clock size={18} /> Upcoming
+                            </h2>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                                {upcoming.map(c => <ContestCard key={c.id} contest={c} status="upcoming" />)}
+                            </div>
                         </div>
-                    </div>
-                )}
+                    )}
 
-                {upcoming.length > 0 && (
                     <div className="mb-12">
-                        <h2 className="text-lg font-semibold text-white flex items-center gap-2 mb-6">
-                            <Clock size={18} /> Upcoming
-                        </h2>
+                        <h2 className="text-lg font-semibold text-zinc-400 mb-6">Past Contests</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                            {upcoming.map(c => <ContestCard key={c.id} contest={c} status="upcoming" />)}
+                            {past.map(c => <ContestCard key={c.id} contest={c} status="past" />)}
+                            {past.length === 0 && <p className="text-zinc-600 italic">No past contests found.</p>}
                         </div>
-                    </div>
-                )}
-
-                <div className="mb-12">
-                    <h2 className="text-lg font-semibold text-zinc-400 mb-6">Past Contests</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                        {past.map(c => <ContestCard key={c.id} contest={c} status="past" />)}
-                        {past.length === 0 && <p className="text-zinc-600 italic">No past contests found.</p>}
                     </div>
                 </div>
             </div>
-        </div>
+        </Skeleton>
     );
 };
 

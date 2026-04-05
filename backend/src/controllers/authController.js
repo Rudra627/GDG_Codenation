@@ -2,6 +2,30 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const pool = require('../config/db');
 const sendEmail = require('../utils/sendEmail');
+
+const sendTokenResponse = (user, statusCode, res, message) => {
+    const payload = { id: user.id, role: user.role };
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1d' });
+
+    const options = {
+        expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 1 day
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+    };
+
+    res.status(statusCode).cookie('token', token, options).json({
+        message,
+        user: {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            profile_image_url: user.profile_image_url
+        }
+    });
+};
+
 // Register a new user
 exports.register = async (req, res) => {
     try {
@@ -67,25 +91,7 @@ exports.login = async (req, res) => {
             return res.status(400).json({ message: 'Invalid credentials.' });
         }
 
-        // Create JWT Payload
-        const payload = {
-            id: user.id,
-            role: user.role
-        };
-
-        // Sign token
-        const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1d' });
-
-        res.status(200).json({
-            message: 'Logged in successfully',
-            token,
-            user: {
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                role: user.role
-            }
-        });
+        sendTokenResponse(user, 200, res, 'Logged in successfully');
 
     } catch (error) {
         console.error(error);
@@ -219,26 +225,20 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
             }
         }
         
-        // 3. Generate internal JWT
-        const jwtPayload = {
-            id: user.id,
-            role: user.role
-        };
-        const token = jwt.sign(jwtPayload, process.env.JWT_SECRET, { expiresIn: '1d' });
-        
-        res.status(200).json({
-            message: 'Logged in successfully',
-            token,
-            user: {
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                role: user.role,
-                profile_image_url: user.profile_image_url
-            }
-        });
+        sendTokenResponse(user, 200, res, 'Logged in successfully');
     } catch (error) {
         console.error("Google Auth Error:", error.message || error);
         res.status(500).json({ message: 'Google Auth Failed', details: error.message });
     }
+};
+
+// Logout User
+exports.logout = (req, res) => {
+    res.cookie('token', 'none', {
+        expires: new Date(Date.now() + 10 * 1000), // expires in 10 seconds
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+    });
+    res.status(200).json({ message: 'User logged out successfully' });
 };

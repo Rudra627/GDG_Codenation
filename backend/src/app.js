@@ -1,13 +1,51 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const cookieParser = require('cookie-parser');
+const morgan = require('morgan');
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
 const app = express();
 
-// Middleware
-app.use(cors());
+// Trust proxy if running behind a reverse proxy (e.g., Nginx, Heroku)
+app.set('trust proxy', 1);
+
+// Security headers
+app.use(helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
+
+// Logging
+morgan.token('body', (req) => {
+    let body = { ...req.body };
+    if (body.password) body.password = '***';
+    return JSON.stringify(body);
+});
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms - body: :body'));
+
+// CORS Policy
+app.use(cors({
+    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    credentials: true,
+}));
+
 app.use(express.json());
+app.use(cookieParser());
+
+const { csrfProtection } = require('./middleware/csrfMiddleware');
+app.use(csrfProtection);
+
+// Rate Limiting
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 1000, // limit each IP to 1000 requests per windowMs for dev
+    message: 'Too many requests from this IP, please try again after 15 minutes',
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+app.use('/api/', apiLimiter);
 
 // Serve static files from 'uploads' directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -36,7 +74,11 @@ app.use('/api/users', userRoutes);
 // Global Error Handler
 app.use((err, req, res, next) => {
     console.error(err.stack);
-    res.status(500).json({ message: 'Something went wrong on the server', error: err.message });
+    const isProduction = process.env.NODE_ENV === 'production';
+    res.status(500).json({ 
+        message: 'Something went wrong on the server', 
+        error: isProduction ? null : err.message 
+    });
 });
 
 const PORT = process.env.PORT || 5000;

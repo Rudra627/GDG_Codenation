@@ -8,18 +8,12 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     const checkLoggedIn = async () => {
-        const token = localStorage.getItem('token');
-        if (token) {
-            try {
-                const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/auth/me`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                setUser(res.data);
-            } catch (error) {
-                console.error("Token expired or invalid", error);
-                localStorage.removeItem('token');
-                setUser(null);
-            }
+        try {
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/auth/me`);
+            setUser(res.data);
+        } catch (error) {
+            console.error("Token expired or invalid", error);
+            setUser(null);
         }
         setLoading(false);
     };
@@ -30,13 +24,11 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (email, password) => {
         const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/login`, { email, password });
-        localStorage.setItem('token', res.data.token);
         setUser(res.data.user);
     };
 
     const googleLogin = async (credential) => {
         const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/google`, { credential });
-        localStorage.setItem('token', res.data.token);
         setUser(res.data.user);
     };
 
@@ -45,8 +37,12 @@ export const AuthProvider = ({ children }) => {
         await login(email, password);
     };
 
-    const logout = () => {
-        localStorage.removeItem('token');
+    const logout = async () => {
+        try {
+            await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/logout`);
+        } catch (error) {
+            console.error("Error logging out", error);
+        }
         setUser(null);
     };
 

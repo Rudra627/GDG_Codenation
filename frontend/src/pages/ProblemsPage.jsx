@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { Play, CheckCircle, Search, Star, Tag } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
+import { Skeleton } from 'boneyard-js/react';
 
 const ProblemsPage = () => {
     const [problems, setProblems] = useState([]);
@@ -120,51 +121,49 @@ const ProblemsPage = () => {
                         <div className="col-span-2 text-center">Action</div>
                     </div>
                     
-                    {loading ? (
-                        <div className="p-12 text-center text-zinc-500">
-                            <div className="inline-block w-8 h-8 border-2 border-zinc-800 border-t-[var(--accent)] rounded-full animate-spin shadow-[0_0_15px_rgba(255,42,42,0.5)]" />
-                        </div>
-                    ) : filteredProblems.length === 0 ? (
-                        <div className="p-12 text-center text-zinc-500">No problems found matching your criteria.</div>
-                    ) : (
-                        <div className="divide-y divide-white/[0.04]">
-                            {filteredProblems.map((prob) => (
-                                <Link 
-                                    to={`/problem/${prob.id}`} 
-                                    key={prob.id}
-                                    className={`flex flex-col md:grid md:grid-cols-12 gap-4 p-5 items-center hover:bg-white/[0.02] transition-colors duration-200 group ${prob.is_daily ? 'bg-[var(--accent)]/[0.02]' : ''}`}
-                                >
-                                    <div className="col-span-1 flex justify-center w-full md:w-auto mb-2 md:mb-0">
-                                        {prob.is_solved ? (
-                                            <CheckCircle className="text-emerald-500" size={22} />
-                                        ) : (
-                                            <div className="w-5 h-5 rounded-full border-2 border-zinc-700 group-hover:border-zinc-500 transition-colors" />
-                                        )}
-                                    </div>
-                                    <div className="col-span-6 md:pl-2 font-bold text-zinc-300 group-hover:text-white transition-colors flex items-center justify-center md:justify-start gap-2 w-full md:w-auto text-center md:text-left mb-3 md:mb-0">
-                                        <span className="text-[15px]">{prob.title}</span>
-                                        {prob.is_daily && (
-                                            <span className="flex items-center gap-1 text-[10px] bg-amber-500/10 text-amber-500 border border-amber-500/20 px-2 py-0.5 rounded-full">
-                                                <Star size={10} fill="currentColor" />
-                                                <span>Daily</span>
+                    <Skeleton name="problems-table" loading={loading}>
+                        {filteredProblems.length === 0 ? (
+                            <div className="p-12 text-center text-zinc-500">No problems found matching your criteria.</div>
+                        ) : (
+                            <div className="divide-y divide-white/[0.04]">
+                                {filteredProblems.map((prob) => (
+                                    <Link 
+                                        to={`/problem/${prob.id}`} 
+                                        key={prob.id}
+                                        className={`flex flex-col md:grid md:grid-cols-12 gap-4 p-5 items-center hover:bg-white/[0.02] transition-colors duration-200 group ${prob.is_daily ? 'bg-[var(--accent)]/[0.02]' : ''}`}
+                                    >
+                                        <div className="col-span-1 flex justify-center w-full md:w-auto mb-2 md:mb-0">
+                                            {prob.is_solved ? (
+                                                <CheckCircle className="text-emerald-500" size={22} />
+                                            ) : (
+                                                <div className="w-5 h-5 rounded-full border-2 border-zinc-700 group-hover:border-zinc-500 transition-colors" />
+                                            )}
+                                        </div>
+                                        <div className="col-span-6 md:pl-2 font-bold text-zinc-300 group-hover:text-white transition-colors flex items-center justify-center md:justify-start gap-2 w-full md:w-auto text-center md:text-left mb-3 md:mb-0">
+                                            <span className="text-[15px]">{prob.title}</span>
+                                            {prob.is_daily && (
+                                                <span className="flex items-center gap-1 text-[10px] bg-amber-500/10 text-amber-500 border border-amber-500/20 px-2 py-0.5 rounded-full">
+                                                    <Star size={10} fill="currentColor" />
+                                                    <span>Daily</span>
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="col-span-3 flex justify-center w-full md:w-auto mb-4 md:mb-0">
+                                            <span className={`px-3 py-1 rounded-md text-[11px] font-bold border ${getDifficultyColor(prob.difficulty)}`}>
+                                                {prob.difficulty}
                                             </span>
-                                        )}
-                                    </div>
-                                    <div className="col-span-3 flex justify-center w-full md:w-auto mb-4 md:mb-0">
-                                        <span className={`px-3 py-1 rounded-md text-[11px] font-bold border ${getDifficultyColor(prob.difficulty)}`}>
-                                            {prob.difficulty}
-                                        </span>
-                                    </div>
-                                    <div className="col-span-2 flex justify-center w-full md:w-auto">
-                                        <button className="flex items-center gap-2 text-sm bg-zinc-900 border border-white/[0.08] text-white group-hover:border-[var(--accent)] group-hover:text-[var(--accent)] group-hover:shadow-[0_0_15px_rgba(255,42,42,0.2)] px-4 py-2 rounded-full font-bold transition-all duration-300">
-                                            <Play size={14} className="group-hover:fill-[var(--accent)]" />
-                                            <span>Solve</span>
-                                        </button>
-                                    </div>
-                                </Link>
-                            ))}
-                        </div>
-                    )}
+                                        </div>
+                                        <div className="col-span-2 flex justify-center w-full md:w-auto">
+                                            <button className="flex items-center gap-2 text-sm bg-zinc-900 border border-white/[0.08] text-white group-hover:border-[var(--accent)] group-hover:text-[var(--accent)] group-hover:shadow-[0_0_15px_rgba(255,42,42,0.2)] px-4 py-2 rounded-full font-bold transition-all duration-300">
+                                                <Play size={14} className="group-hover:fill-[var(--accent)]" />
+                                                <span>Solve</span>
+                                            </button>
+                                        </div>
+                                    </Link>
+                                ))}
+                            </div>
+                        )}
+                    </Skeleton>
                 </div>
             </div>
         </div>

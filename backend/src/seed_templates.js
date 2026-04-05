@@ -48,7 +48,7 @@ async function seed() {
         await pool.query(`
             CREATE TABLE problem_templates (
                 id INT AUTO_INCREMENT PRIMARY KEY,
-                problem_id INT UNSIGNED NOT NULL,
+                problem_id INT NOT NULL,
                 language VARCHAR(50) NOT NULL,
                 starter_code TEXT,
                 driver_code TEXT,
