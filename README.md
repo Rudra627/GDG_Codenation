@@ -49,14 +49,7 @@ source database/schema.sql;
 2. Install dependencies: `npm install`
 3. Edit `.env` file and structure it based on the provided `.env.example`:
 ```
-PORT=5000
-DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=your_mysql_password
-DB_NAME=leetcode_clone
-JWT_SECRET=your_jwt_secret_key
-JUDGE0_API_URL=https://judge0-ce.p.rapidapi.com
-JUDGE0_API_KEY=your_rapidapi_key_here
+
 ```
 4. Get your Judge0 key from [RapidAPI Judge0 CE](https://rapidapi.com/judge0-official/api/judge0-ce).
 5. Start server: `npm run dev` (Runs on http://localhost:5000)
