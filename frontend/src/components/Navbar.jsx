@@ -41,7 +41,7 @@ const Navbar = () => {
     return (
         <>
         <nav className="bg-[#0f0f11]/80 backdrop-blur-2xl border-b border-white/[0.05] sticky top-0 z-[100] px-6 md:px-10 py-4 flex items-center justify-between">
-            {/* Left Section: Logo */}
+           
             <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity z-50 group" onClick={() => setIsMobileMenuOpen(false)}>
                 <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-[0_0_15px_rgba(255,255,255,0.2)] group-hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-shadow">
                     <Code2 size={16} className="text-black" />
@@ -49,7 +49,7 @@ const Navbar = () => {
                 <span className="text-white font-semibold tracking-tight text-lg">GDG Code Nation</span>
             </Link>
 
-            {/* Center Section: Navigation Links */}
+           
             <div className="hidden lg:flex items-center gap-2 absolute left-1/2 -translate-x-1/2 bg-white/[0.03] p-1 rounded-full border border-white/[0.05]">
                 {navLink('/', 'Home')}
                 {user && (
@@ -63,7 +63,7 @@ const Navbar = () => {
                 {user?.role === 'Admin' && navLink('/admin', 'Admin')}
             </div>
 
-            {/* Right Section: Action Button */}
+            
             <div className="hidden md:flex items-center gap-4">
                 {user ? (
                     <>
