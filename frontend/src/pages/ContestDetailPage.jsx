@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';
 import { AuthContext } from '../context/AuthContext';
 import { Clock, Users, Trophy, PlayCircle, Loader2 } from 'lucide-react';
 import Loader from '../components/Loader';
@@ -23,18 +23,12 @@ const ContestDetailPage = () => {
     useEffect(() => {
         const fetchContest = async () => {
             try {
-                const tk = token || localStorage.getItem('token');
-                if (!tk) return;
+                if (!token && !localStorage.getItem('token')) return;
                 
-                const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/contests/${id}`, {
-                    headers: { Authorization: `Bearer ${tk}` }
-                });
+                const res = await api.get(`/api/contests/${id}`);
                 setContest(res.data);
-                
 
-                const lbRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/contests/${id}/leaderboard`, {
-                    headers: { Authorization: `Bearer ${tk}` }
-                });
+                const lbRes = await api.get(`/api/contests/${id}/leaderboard`);
                 setLeaderboard(lbRes.data);
                 
             } catch (err) {
@@ -80,15 +74,10 @@ const ContestDetailPage = () => {
         setJoining(true);
         setJoinMessage('');
         try {
-            const tk = token || localStorage.getItem('token');
-            await axios.post(`${import.meta.env.VITE_API_URL}/api/contests/${id}/join`, {}, {
-                headers: { Authorization: `Bearer ${tk}` }
-            });
+            await api.post(`/api/contests/${id}/join`);
             setJoinMessage('Successfully joined! You appear on the roster.');
             // Refresh Leaderboard to show user at 0
-            const lbRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/contests/${id}/leaderboard`, {
-                headers: { Authorization: `Bearer ${tk}` }
-            });
+            const lbRes = await api.get(`/api/contests/${id}/leaderboard`);
             setLeaderboard(lbRes.data);
         } catch (err) {
             setJoinMessage(err.response?.data?.message || 'Failed to join');
@@ -103,10 +92,7 @@ const ContestDetailPage = () => {
         setSendingReminder(true);
         setReminderMessage('');
         try {
-            const tk = token || localStorage.getItem('token');
-            const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/contests/${id}/remind`, {}, {
-                headers: { Authorization: `Bearer ${tk}` }
-            });
+            const res = await api.post(`/api/contests/${id}/remind`);
             setReminderMessage(`Success! Sent ${res.data.successCount} emails. (${res.data.failCount} failed).`);
         } catch (err) {
             setReminderMessage(err.response?.data?.message || 'Failed to send reminders');
@@ -197,10 +183,7 @@ const ContestDetailPage = () => {
                                             onClick={async () => {
                                                 if (!window.confirm("Are you sure you want to delete this contest? All related data will be lost.")) return;
                                                 try {
-                                                    const tk = token || localStorage.getItem('token');
-                                                    await axios.delete(`${import.meta.env.VITE_API_URL}/api/contests/${contest.id}`, {
-                                                        headers: { Authorization: `Bearer ${tk}` }
-                                                    });
+                                                    await api.delete(`/api/contests/${contest.id}`);
                                                     navigate('/contests');
                                                 } catch (err) {
                                                     alert(err.response?.data?.message || 'Failed to delete contest');

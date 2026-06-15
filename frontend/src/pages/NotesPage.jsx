@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api';
 import { Search, Tag, BookOpen } from 'lucide-react';
 import Loader from '../components/Loader';
 import { Skeleton } from 'boneyard-js/react';
@@ -25,14 +25,12 @@ const NotesPage = () => {
 
     const fetchNotes = async () => {
         setIsLoading(true);
-        const token = localStorage.getItem('token');
-        const headers = { Authorization: `Bearer ${token}` };
         try {
-            let url = `${import.meta.env.VITE_API_URL}/api/notes`;
+            let url = `/api/notes`;
             if (selectedTopic) {
                 url += `?topic=${encodeURIComponent(selectedTopic)}`;
             }
-            const res = await axios.get(url, { headers });
+            const res = await api.get(url);
             setNotes(res.data);
         } catch (error) {
             console.error("Fetch errors", error);
@@ -44,14 +42,12 @@ const NotesPage = () => {
     const handleSearch = async (e) => {
         e.preventDefault();
         setIsLoading(true);
-        const token = localStorage.getItem('token');
-        const headers = { Authorization: `Bearer ${token}` };
         try {
-            let url = `${import.meta.env.VITE_API_URL}/api/notes?search=${encodeURIComponent(searchQuery)}`;
+            let url = `/api/notes?search=${encodeURIComponent(searchQuery)}`;
             if (selectedTopic) {
                 url += `&topic=${encodeURIComponent(selectedTopic)}`;
             }
-            const res = await axios.get(url, { headers });
+            const res = await api.get(url);
             setNotes(res.data);
         } catch (error) {
             console.error("Search error", error);

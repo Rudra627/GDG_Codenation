@@ -1,5 +1,5 @@
 import { createContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api';
 
 export const AuthContext = createContext();
 
@@ -9,7 +9,7 @@ export const AuthProvider = ({ children }) => {
 
     const checkLoggedIn = async () => {
         try {
-            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/auth/me`);
+            const res = await api.get('/api/auth/me');
             setUser(res.data);
         } catch (error) {
             console.error("Token expired or invalid", error);
@@ -23,23 +23,23 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const login = async (email, password) => {
-        const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/login`, { email, password });
+        const res = await api.post('/api/auth/login', { email, password });
         setUser(res.data.user);
     };
 
     const googleLogin = async (credential) => {
-        const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/google`, { credential });
+        const res = await api.post('/api/auth/google', { credential });
         setUser(res.data.user);
     };
 
     const register = async (name, email, password) => {
-        await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/register`, { name, email, password });
+        await api.post('/api/auth/register', { name, email, password });
         await login(email, password);
     };
 
     const logout = async () => {
         try {
-            await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/logout`);
+            await api.post('/api/auth/logout');
         } catch (error) {
             console.error("Error logging out", error);
         }

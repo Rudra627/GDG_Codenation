@@ -1,4 +1,5 @@
 const pool = require('../config/db');
+const { helpers } = require('../config/db');
 
 // ─── Auto-Generation Helpers ─────────────────────────────────────────────────
 
@@ -207,7 +208,7 @@ exports.autoGenerateTemplates = async (problemId, fnName, paramsStr, returnType 
         pool.query(
             `INSERT INTO problem_templates (problem_id, language, starter_code, driver_code)
              VALUES (?, ?, ?, ?)
-             ON DUPLICATE KEY UPDATE starter_code = VALUES(starter_code), driver_code = VALUES(driver_code), updated_at = NOW()`,
+             ${helpers.onDuplicate('problem_id, language')} starter_code = ${helpers.values('starter_code')}, driver_code = ${helpers.values('driver_code')}, updated_at = ${helpers.now()}`,
             [problemId, lang, starters[lang], drivers[lang]]
         )
     ));
@@ -250,7 +251,7 @@ exports.saveTemplate = async (req, res) => {
         await pool.query(
             `INSERT INTO problem_templates (problem_id, language, starter_code, driver_code)
              VALUES (?, ?, ?, ?)
-             ON DUPLICATE KEY UPDATE starter_code = VALUES(starter_code), driver_code = VALUES(driver_code), updated_at = NOW()`,
+             ${helpers.onDuplicate('problem_id, language')} starter_code = ${helpers.values('starter_code')}, driver_code = ${helpers.values('driver_code')}, updated_at = ${helpers.now()}`,
             [id, language.toLowerCase(), starter_code, driver_code]
         );
 

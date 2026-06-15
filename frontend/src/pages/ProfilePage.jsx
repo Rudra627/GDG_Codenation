@@ -1,7 +1,7 @@
 import { useEffect, useState, useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import axios from 'axios';
+import api from '../api';
 import { Terminal, Activity, Trophy, Code2 } from 'lucide-react';
 
 const ProfilePage = () => {
@@ -33,9 +33,7 @@ const ProfilePage = () => {
                 setErrorMsg('');
                 
                 const targetId = routeId || user.id;
-                const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/users/${targetId}/profile`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                const res = await api.get(`/api/users/${targetId}/profile`);
                 
                 const fetchedUser = res.data.user;
                 const subs = res.data.submissions || [];
@@ -119,14 +117,7 @@ const ProfilePage = () => {
                 formData.append('profile_image', editImageFile);
             }
 
-            const res = await axios.put(`${import.meta.env.VITE_API_URL}/api/auth/profile`, 
-                formData,
-                { 
-                    headers: { 
-                        Authorization: `Bearer ${token}`
-                    } 
-                }
-            );
+            const res = await api.put(`/api/auth/profile`, formData);
             updateUserDetails(res.data.user);
             setEditMode(false);
         } catch (err) {

@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';
 import { AuthContext } from '../context/AuthContext';
 import { Target, Search, PlusCircle, Trash, Clock } from 'lucide-react';
 import Loader from '../components/Loader';
@@ -30,12 +30,8 @@ const EditContestPage = () => {
 
         const fetchData = async () => {
             try {
-                const tk = token || localStorage.getItem('token');
-                
                 // Fetch contest details
-                const contestRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/contests/${id}`, {
-                    headers: { Authorization: `Bearer ${tk}` }
-                });
+                const contestRes = await api.get(`/api/contests/${id}`);
                 
                 const contest = contestRes.data;
                 setTitle(contest.title);
@@ -56,9 +52,7 @@ const EditContestPage = () => {
                 }
 
                 // Fetch all problems
-                const probRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/problems`, {
-                    headers: { Authorization: `Bearer ${tk}` }
-                });
+                const probRes = await api.get(`/api/problems`);
                 setAllProblems(probRes.data);
             } catch (err) {
                 console.error("Failed to load data", err);
@@ -102,7 +96,6 @@ const EditContestPage = () => {
         }
 
         try {
-            const tk = token || localStorage.getItem('token');
             const dStart = new Date(startTime);
             const dEnd = new Date(endTime);
             
@@ -114,9 +107,7 @@ const EditContestPage = () => {
                 problems: selectedProblems.map(p => ({ id: p.id, points: p.points }))
             };
 
-            await axios.put(`${import.meta.env.VITE_API_URL}/api/contests/${id}`, payload, {
-                headers: { Authorization: `Bearer ${tk}` }
-            });
+            await api.put(`/api/contests/${id}`, payload);
 
             navigate(`/contests/${id}`);
         } catch (err) {

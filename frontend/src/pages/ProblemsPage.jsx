@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';
 import { Play, CheckCircle, Search, Star, Tag } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import { Skeleton } from 'boneyard-js/react';
@@ -16,15 +16,12 @@ const ProblemsPage = () => {
     useEffect(() => {
         const fetchProblems = async () => {
             try {
-                const token = localStorage.getItem('token');
-                const headers = { Authorization: `Bearer ${token}` };
-                const endpoint = `${import.meta.env.VITE_API_URL}/api/problems/user-status`;
-                const res = await axios.get(endpoint, { headers });
+                const res = await api.get(`/api/problems/user-status`);
                 setProblems(res.data);
             } catch (error) {
                 console.error("Error fetching problems", error);
                 try {
-                     const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/problems`);
+                     const res = await api.get(`/api/problems`);
                      setProblems(res.data);
                 } catch(e) {}
             } finally {

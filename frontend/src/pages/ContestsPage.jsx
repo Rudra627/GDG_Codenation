@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';
 import { Trophy, Clock, PlayCircle, Plus, Users } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import { Skeleton } from 'boneyard-js/react';
@@ -15,11 +15,8 @@ const ContestsPage = () => {
     useEffect(() => {
         const fetchContests = async () => {
             try {
-                const token = localStorage.getItem('token');
-                if (!token) return;
-                const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/contests`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                if (!localStorage.getItem('token')) return;
+                const res = await api.get(`/api/contests`);
                 setContests(res.data);
             } catch (err) {
                 console.error('Error fetching contests:', err);

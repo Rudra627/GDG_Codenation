@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';
 import { AuthContext } from '../context/AuthContext';
 import { Target, Search, PlusCircle, Trash, Clock } from 'lucide-react';
 import Loader from '../components/Loader';
@@ -29,9 +29,7 @@ const CreateContestPage = () => {
 
         const fetchProblems = async () => {
             try {
-                const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/problems`, {
-                    headers: { Authorization: `Bearer ${token || localStorage.getItem('token')}` }
-                });
+                const res = await api.get(`/api/problems`);
                 setAllProblems(res.data);
             } catch (err) {
                 console.error("Failed to load problems", err);
@@ -74,7 +72,6 @@ const CreateContestPage = () => {
         }
 
         try {
-            const tk = token || localStorage.getItem('token');
             const payload = {
                 title,
                 description,
@@ -83,9 +80,7 @@ const CreateContestPage = () => {
                 problems: selectedProblems.map(p => ({ id: p.id, points: p.points }))
             };
 
-            await axios.post(`${import.meta.env.VITE_API_URL}/api/contests`, payload, {
-                headers: { Authorization: `Bearer ${tk}` }
-            });
+            await api.post(`/api/contests`, payload);
 
             navigate('/contests');
         } catch (err) {

@@ -1,4 +1,5 @@
 const pool = require('../config/db');
+const { helpers } = require('../config/db');
 const sendEmail = require('../utils/sendEmail');
 
 // Get all users (Admin only)
@@ -26,20 +27,26 @@ exports.deleteUser = async (req, res) => {
             return res.status(403).json({ message: 'Cannot delete an Admin account.' });
         }
 
-        // To safely delete a user with many cascading foreign keys (like submissions, contest_participants, etc.)
-        // we can temporarily disable foreign key checks for this transaction.
         const connection = await pool.getConnection();
         try {
             await connection.beginTransaction();
             
-            await connection.query('SET FOREIGN_KEY_CHECKS = 0');
+            if (!helpers.isPG()) {
+                await connection.query('SET FOREIGN_KEY_CHECKS = 0');
+            }
             
-            // Delete all the user's data to avoid orphans, then delete the user
             await connection.query('DELETE FROM contest_participants WHERE user_id = ?', [id]);
             await connection.query('DELETE FROM submissions WHERE user_id = ?', [id]);
+            if (helpers.isPG()) {
+                await connection.query('DELETE FROM contest_problems WHERE problem_id IN (SELECT id FROM problems WHERE created_by = ?)', [id]);
+                await connection.query('DELETE FROM problem_templates WHERE problem_id IN (SELECT id FROM problems WHERE created_by = ?)', [id]);
+                await connection.query('DELETE FROM problems WHERE created_by = ?', [id]);
+            }
             const [result] = await connection.query('DELETE FROM users WHERE id = ?', [id]);
             
-            await connection.query('SET FOREIGN_KEY_CHECKS = 1');
+            if (!helpers.isPG()) {
+                await connection.query('SET FOREIGN_KEY_CHECKS = 1');
+            }
             
             await connection.commit();
 
@@ -48,9 +55,11 @@ exports.deleteUser = async (req, res) => {
             }
             res.status(200).json({ message: 'User deleted successfully' });
         } catch (dbError) {
-            await connection.query('SET FOREIGN_KEY_CHECKS = 1');
+            if (!helpers.isPG()) {
+                await connection.query('SET FOREIGN_KEY_CHECKS = 1');
+            }
             await connection.rollback();
-            throw dbError; // Pass down to main catch
+            throw dbError;
         } finally {
             connection.release();
         }

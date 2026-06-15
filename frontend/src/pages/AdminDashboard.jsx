@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';
 
 const AdminDashboard = () => {
     const [activeTab, setActiveTab] = useState('problems'); // 'problems', 'submissions', 'notes', 'users'
@@ -32,20 +32,18 @@ const AdminDashboard = () => {
     }, [activeTab]); // eslint-disable-line
 
     const fetchData = async () => {
-        const token = localStorage.getItem('token');
-        const headers = { Authorization: `Bearer ${token}` };
         try {
             if (activeTab === 'problems') {
-                const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/problems`, { headers });
+                const res = await api.get(`/api/problems`);
                 setProblems(res.data);
             } else if (activeTab === 'submissions') {
-                const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/submissions/all`, { headers });
+                const res = await api.get(`/api/submissions/all`);
                 setSubmissions(res.data);
             } else if (activeTab === 'notes') {
-                const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/notes`, { headers });
+                const res = await api.get(`/api/notes`);
                 setNotes(res.data);
             } else if (activeTab === 'users') {
-                const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/users`, { headers });
+                const res = await api.get(`/api/users`);
                 setUsers(res.data);
                 setSelectedUserIds([]);
             }
@@ -57,17 +55,15 @@ const AdminDashboard = () => {
     const handleCreateProblem = async (e) => {
         e.preventDefault();
         setMessage('');
-        const token = localStorage.getItem('token');
-        const headers = { Authorization: `Bearer ${token}` };
         try {
             let problemId = editProblemId;
             if (isEditing) {
-                await axios.put(`${import.meta.env.VITE_API_URL}/api/problems/${problemId}`, formData, { headers });
+                await api.put(`/api/problems/${problemId}`, formData);
                 setMessage('Problem updated successfully!');
                 setIsEditing(false);
                 setEditProblemId(null);
             } else {
-                const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/problems`, formData, { headers });
+                const res = await api.post(`/api/problems`, formData);
                 problemId = res.data.problemId;
                 setMessage('Problem created successfully!');
             }
@@ -80,11 +76,8 @@ const AdminDashboard = () => {
 
     const handleEditClick = async (id) => {
         setMessage('');
-        const token = localStorage.getItem('token');
         try {
-            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/problems/${id}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const res = await api.get(`/api/problems/${id}`);
             const problem = res.data;
             setFormData({ title: problem.title, description: problem.description, difficulty: problem.difficulty, topics: problem.topics || '' });
             setIsEditing(true);
@@ -106,11 +99,8 @@ const AdminDashboard = () => {
     const handleDeleteProblem = async (id) => {
         if (!window.confirm('Are you sure you want to delete this problem? All associated test cases and submissions will also be affected.')) return;
         setMessage('');
-        const token = localStorage.getItem('token');
         try {
-            await axios.delete(`${import.meta.env.VITE_API_URL}/api/problems/${id}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await api.delete(`/api/problems/${id}`);
             setMessage('Problem deleted successfully!');
             if (isEditing && editProblemId === id) {
                 handleCancelEdit();
@@ -124,11 +114,8 @@ const AdminDashboard = () => {
     const handleAddTestCase = async (e) => {
         e.preventDefault();
         setMessage('');
-        const token = localStorage.getItem('token');
         try {
-            await axios.post(`${import.meta.env.VITE_API_URL}/api/problems/${testCaseData.problem_id}/testcases`, testCaseData, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await api.post(`/api/problems/${testCaseData.problem_id}/testcases`, testCaseData);
             setMessage('Test case added successfully!');
             setTestCaseData({ problem_id: '', input: '', expected_output: '', is_hidden: false });
         } catch (error) {
@@ -139,7 +126,6 @@ const AdminDashboard = () => {
     const handleCreateNote = async (e) => {
         e.preventDefault();
         setMessage('');
-        const token = localStorage.getItem('token');
         
         const form = new FormData();
         form.append('title', noteData.title);
@@ -151,22 +137,12 @@ const AdminDashboard = () => {
 
         try {
             if (isEditingNote) {
-                await axios.put(`${import.meta.env.VITE_API_URL}/api/notes/${editNoteId}`, form, {
-                    headers: { 
-                        Authorization: `Bearer ${token}`,
-                        'Content-Type': 'multipart/form-data'
-                    }
-                });
+                await api.put(`/api/notes/${editNoteId}`, form);
                 setMessage('Note updated successfully!');
                 setIsEditingNote(false);
                 setEditNoteId(null);
             } else {
-                await axios.post(`${import.meta.env.VITE_API_URL}/api/notes`, form, {
-                    headers: { 
-                        Authorization: `Bearer ${token}`,
-                        'Content-Type': 'multipart/form-data'
-                    }
-                });
+                await api.post(`/api/notes`, form);
                 setMessage('Note created successfully!');
             }
             setNoteData({ title: '', topic: '', content: '', file: null });
@@ -178,11 +154,8 @@ const AdminDashboard = () => {
 
     const handleEditNoteClick = async (id) => {
         setMessage('');
-        const token = localStorage.getItem('token');
         try {
-            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/notes/${id}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const res = await api.get(`/api/notes/${id}`);
             const note = res.data;
             setNoteData({ title: note.title, topic: note.topic, content: note.content || '', file: null });
             setIsEditingNote(true);
@@ -203,11 +176,8 @@ const AdminDashboard = () => {
     const handleDeleteNote = async (id) => {
         if (!window.confirm('Are you sure you want to delete this note?')) return;
         setMessage('');
-        const token = localStorage.getItem('token');
         try {
-            await axios.delete(`${import.meta.env.VITE_API_URL}/api/notes/${id}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await api.delete(`/api/notes/${id}`);
             setMessage('Note deleted successfully!');
             if (isEditingNote && editNoteId === id) {
                 handleCancelEditNote();
@@ -220,11 +190,8 @@ const AdminDashboard = () => {
 
     const handleSetDailyChallenge = async (id) => {
         setMessage('');
-        const token = localStorage.getItem('token');
         try {
-            await axios.put(`${import.meta.env.VITE_API_URL}/api/problems/${id}/daily`, {}, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await api.put(`/api/problems/${id}/daily`);
             setMessage('Problem set as Daily Challenge successfully!');
             fetchData();
         } catch (error) {
@@ -237,11 +204,8 @@ const AdminDashboard = () => {
     const handleUpdateSubmissionStatus = async (id, status) => {
         setStatusUpdating(true);
         setMessage('');
-        const token = localStorage.getItem('token');
         try {
-            await axios.put(`${import.meta.env.VITE_API_URL}/api/submissions/${id}/status`, { status }, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await api.put(`/api/submissions/${id}/status`, { status });
             setMessage(`Submission #${id} marked as ${status}`);
             fetchData();
             setExpandedSubmission(null);
@@ -256,11 +220,8 @@ const AdminDashboard = () => {
         if (!window.confirm('Are you ABSOLUTELY sure you want to delete ALL submissions? This action cannot be undone!')) return;
         
         setMessage('');
-        const token = localStorage.getItem('token');
         try {
-            await axios.delete(`${import.meta.env.VITE_API_URL}/api/submissions/all`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await api.delete(`/api/submissions/all`);
             setMessage('All submissions have been successfully cleared!');
             setExpandedSubmission(null);
             fetchData();
@@ -289,11 +250,8 @@ const AdminDashboard = () => {
     const handleDeleteUser = async (id) => {
         if (!window.confirm('Are you sure you want to delete this user account? This action cannot be undone.')) return;
         setMessage('');
-        const token = localStorage.getItem('token');
         try {
-            await axios.delete(`${import.meta.env.VITE_API_URL}/api/users/${id}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await api.delete(`/api/users/${id}`);
             setMessage('User deleted successfully!');
             fetchData();
         } catch (error) {
@@ -304,11 +262,8 @@ const AdminDashboard = () => {
     const handleBlockUser = async (id, currentStatus) => {
         if (!window.confirm(`Are you sure you want to ${currentStatus ? 'unblock' : 'block'} this user?`)) return;
         setMessage('');
-        const token = localStorage.getItem('token');
         try {
-            await axios.put(`${import.meta.env.VITE_API_URL}/api/users/${id}/block`, { is_blocked: !currentStatus }, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await api.put(`/api/users/${id}/block`, { is_blocked: !currentStatus });
             setMessage(`User ${currentStatus ? 'unblocked' : 'blocked'} successfully!`);
             fetchData();
         } catch (error) {
@@ -339,14 +294,11 @@ const AdminDashboard = () => {
         setSendingReminder(true);
         setMessage('');
 
-        const token = localStorage.getItem('token');
         try {
-            const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/users/send-reminders`, {
+            const res = await api.post(`/api/users/send-reminders`, {
                 userIds: selectedUserIds,
                 subject: reminderData.subject,
                 message: reminderData.message
-            }, {
-                headers: { Authorization: `Bearer ${token}` }
             });
 
             setMessage(res.data.message);

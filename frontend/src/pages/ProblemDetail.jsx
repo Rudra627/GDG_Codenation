@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';
 import { AuthContext } from '../context/AuthContext';
 import Editor from '@monaco-editor/react';
 import Split from 'react-split';
@@ -194,16 +194,14 @@ const ProblemDetail = () => {
 
     useEffect(() => {
         setLoading(true);
-        const token = localStorage.getItem('token');
-        const headers = { Authorization: `Bearer ${token}` };
 
         // 1. Fetch Problem
-        axios.get(`${import.meta.env.VITE_API_URL}/api/problems/${id}`)
+        api.get(`/api/problems/${id}`)
             .then((probRes) => {
                 setProblem(probRes.data);
                 
                 // 2. Fetch Samples Independently (Do not chain template fetch to this)
-                axios.get(`${import.meta.env.VITE_API_URL}/api/problems/${id}/samples`)
+                api.get(`/api/problems/${id}/samples`)
                     .then((samplesRes) => {
                         const samples = samplesRes.data || [];
                         setSampleCases(samples);
@@ -216,7 +214,7 @@ const ProblemDetail = () => {
                     });
 
                 // 3. Fetch Template Independently (So a 404 here NEVER clears samples)
-                axios.get(`${import.meta.env.VITE_API_URL}/api/problems/${id}/template/${language}`)
+                api.get(`/api/problems/${id}/template/${language}`)
                     .then(tplRes => {
                         if (tplRes.data?.starter_code) {
                             setCode(tplRes.data.starter_code);
@@ -241,7 +239,7 @@ const ProblemDetail = () => {
     // Handle template changes when user switches language
     useEffect(() => {
         if (!id || loading) return;
-        axios.get(`${import.meta.env.VITE_API_URL}/api/problems/${id}/template/${language}`)
+        api.get(`/api/problems/${id}/template/${language}`)
             .then(res => {
                 if (res.data?.starter_code) {
                     setCode(res.data.starter_code);
@@ -265,8 +263,6 @@ const ProblemDetail = () => {
         setActiveResult(null);
     };
 
-    const authHeader = () => ({ Authorization: `Bearer ${localStorage.getItem('token')}` });
-
     const handleRun = async () => {
         setRunning(true);
         setRunResult(null);
@@ -281,11 +277,7 @@ const ProblemDetail = () => {
             if (activeTestCaseTab === -1) {
                 payload.customInput = customInputVal;
             }
-            const { data } = await axios.post(
-                `${import.meta.env.VITE_API_URL}/api/submissions/run`,
-                payload,
-                { headers: authHeader() }
-            );
+            const { data } = await api.post(`/api/submissions/run`, payload);
             setRunResult(data);
         } catch (err) {
             const errDetails = err.response?.data?.message || err.response?.data?.details || err.message;
@@ -306,11 +298,7 @@ const ProblemDetail = () => {
         try {
             const payload = { problemId: id, language, code };
             if (contestId) payload.contestId = contestId;
-            const { data } = await axios.post(
-                `${import.meta.env.VITE_API_URL}/api/submissions`,
-                payload,
-                { headers: authHeader() }
-            );
+            const { data } = await api.post(`/api/submissions`, payload);
             setSubmitResult(data);
         } catch (err) {
             const errDetails = err.response?.data?.message || err.response?.data?.details || err.message;
@@ -483,7 +471,7 @@ const ProblemDetail = () => {
                     <button
                         onClick={() => {
                             // Re-fetch template (or fall back to generic) on reset
-                            axios.get(`${import.meta.env.VITE_API_URL}/api/problems/${id}/template/${language}`)
+                            api.get(`/api/problems/${id}/template/${language}`)
                                 .then(res => setCode(res.data.starter_code))
                                 .catch(() => setCode(TEMPLATES[language] || ''));
                         }}
