@@ -1,0 +1,22 @@
+[
+  { "id": "arrays",          "label": "Arrays",            "order": 1,  "color": "#3b82f6", "description": "Foundation of DSA — indexing, traversal, and in-place manipulation." },
+  { "id": "strings",         "label": "Strings",           "order": 2,  "color": "#8b5cf6", "description": "Character manipulation, pattern matching, and substring problems." },
+  { "id": "linked-list",     "label": "Linked List",       "order": 3,  "color": "#ec4899", "description": "Pointer manipulation, reversals, and two-pointer techniques." },
+  { "id": "stack-queue",     "label": "Stack & Queue",     "order": 4,  "color": "#f97316", "description": "LIFO/FIFO structures, monotonic stacks, and deque problems." },
+  { "id": "binary-search",   "label": "Binary Search",     "order": 5,  "color": "#06b6d4", "description": "Logarithmic search on sorted arrays and search spaces." },
+  { "id": "two-pointers",    "label": "Two Pointers",      "order": 6,  "color": "#10b981", "description": "Left/right pointer technique for array and string problems." },
+  { "id": "sliding-window",  "label": "Sliding Window",    "order": 7,  "color": "#84cc16", "description": "Dynamic window for subarray/substring optimization problems." },
+  { "id": "recursion",       "label": "Recursion",         "order": 8,  "color": "#f59e0b", "description": "Base case and inductive step — the core of divide and conquer." },
+  { "id": "sorting",         "label": "Sorting",           "order": 9,  "color": "#6366f1", "description": "Comparison and non-comparison sorting algorithms and applications." },
+  { "id": "hashing",         "label": "Hashing",           "order": 10, "color": "#14b8a6", "description": "Hash maps, hash sets — O(1) lookup and frequency counting." },
+  { "id": "binary-tree",     "label": "Binary Tree",       "order": 11, "color": "#22c55e", "description": "BFS, DFS, traversals, and tree construction problems." },
+  { "id": "bst",             "label": "BST",               "order": 12, "color": "#a3e635", "description": "Binary Search Tree properties, inorder traversal, and search." },
+  { "id": "heap",            "label": "Heap / Priority Queue", "order": 13, "color": "#fb923c", "description": "Min/max heaps, kth elements, and scheduling problems." },
+  { "id": "graphs",          "label": "Graphs",            "order": 14, "color": "#60a5fa", "description": "BFS, DFS, Dijkstra, and connectivity algorithms." },
+  { "id": "greedy",          "label": "Greedy",            "order": 15, "color": "#f472b6", "description": "Locally optimal choices that lead to globally optimal solutions." },
+  { "id": "backtracking",    "label": "Backtracking",      "order": 16, "color": "#a78bfa", "description": "Exhaustive search with pruning — permutations, subsets, N-queens." },
+  { "id": "dp",              "label": "Dynamic Programming","order": 17, "color": "#34d399", "description": "Overlapping subproblems and optimal substructure — 1D and 2D DP." },
+  { "id": "tries",           "label": "Tries",             "order": 18, "color": "#38bdf8", "description": "Prefix trees for efficient string search and autocomplete." },
+  { "id": "bit-manipulation","label": "Bit Manipulation",  "order": 19, "color": "#fbbf24", "description": "Bitwise operators — XOR tricks, bit counting, and masking." },
+  { "id": "math",            "label": "Math & Number Theory","order": 20,"color": "#f43f5e", "description": "Primes, GCD, modular arithmetic, and number properties." }
+]

@@ -52,6 +52,7 @@ const Navbar = () => {
            
             <div className="hidden lg:flex items-center gap-2 absolute left-1/2 -translate-x-1/2 bg-white/[0.03] p-1 rounded-full border border-white/[0.05]">
                 {navLink('/', 'Home')}
+                {navLink('/sheet', 'DSA Sheet')}
                 {user && (
                     <>
                         {navLink('/problems', 'Problems')}
@@ -126,6 +127,9 @@ const Navbar = () => {
             </button>
 
             <Link to="/" className="text-sm font-medium text-zinc-400 hover:text-white py-3 px-4 rounded-xl hover:bg-white/5 transition-colors" onClick={() => setIsMobileMenuOpen(false)}>Home</Link>
+            <Link to="/sheet" className="text-sm font-medium text-zinc-400 hover:text-white py-3 px-4 rounded-xl hover:bg-white/5 transition-colors flex items-center gap-2" onClick={() => setIsMobileMenuOpen(false)}>
+                <span>DSA Sheet</span>
+            </Link>
             
             {user && (
                 <>

@@ -15,6 +15,7 @@ import EditContestPage from './pages/EditContestPage';
 import ContestDetailPage from './pages/ContestDetailPage';
 import RoadmapPage from './pages/RoadmapPage';
 import DocumentationPage from './pages/DocumentationPage';
+import DSASheet from './pages/DSASheet';
 import Navbar from './components/Navbar';
 import Loader from './components/Loader';
 
@@ -52,14 +53,8 @@ function App() {
                 </ProtectedRoute>
               } 
             />
-            <Route 
-              path="/problems" 
-              element={
-                <ProtectedRoute>
-                  <ProblemsPage />
-                </ProtectedRoute>
-              } 
-            />
+            <Route path="/problems" element={<ProblemsPage />} />
+            <Route path="/sheet" element={<DSASheet />} />
             <Route 
               path="/problem/:id" 
               element={
