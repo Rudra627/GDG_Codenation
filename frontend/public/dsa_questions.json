@@ -29,6 +29,11 @@
       "question_name": "Pow (x^n)",
       "url": "https://leetcode.com/problems/powx-n/",
       "company_asked": ["LinkedIn"]
+    },
+    {
+        "question_name": "Find the Duplicate Number",
+        "url": "https://leetcode.com/problems/find-the-duplicate-number/",
+        "company_asked": ["Google"]
     }
   ]
 }

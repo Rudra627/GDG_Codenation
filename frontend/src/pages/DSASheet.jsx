@@ -32,7 +32,7 @@ const ProgressRing = ({ solved, total, color, size = 56, stroke = 4 }) => {
   const offset = circ * (1 - pct);
   return (
     <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
-     {/* <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={stroke} /> */}
+     <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={stroke} />
       <circle
         cx={size / 2} cy={size / 2} r={radius}
         fill="none" stroke={color} strokeWidth={stroke}
